@@ -98,7 +98,7 @@
         <div class="meal-total">🔥 {{ m.total_kcal }} kcal &nbsp;|&nbsp; 💪 {{ m.total_prot }}g</div>
       </div>
       <div class="meal-items">
-        {% for item in m.items %}
+        {% for item in m['items'] %}
         <div class="meal-item">
           <div>
             <div class="meal-item-name">{{ item.name }}</div>
