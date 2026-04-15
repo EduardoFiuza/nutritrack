@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar Conta — NutriTrack</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>🥗 NutriTrack</h1>
+      <p>Crie sua conta gratuita</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div class="form-group">
+        <label class="form-label">👤 Nome</label>
+        <input type="text" name="name" class="form-control" placeholder="Seu nome" required autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">📧 E-mail</label>
+        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔒 Senha</label>
+        <input type="password" name="password" id="password" class="form-control"
+               placeholder="Mínimo 6 caracteres" required minlength="6" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔒 Confirmar Senha</label>
+        <input type="password" name="confirm_password" id="confirm_password" class="form-control"
+               placeholder="Repita a senha" required />
+        <p id="pw-match" style="font-size:.8rem;margin-top:4px;display:none;"></p>
+      </div>
+      <button type="submit" class="btn btn-success btn-block" style="margin-top:8px;">
+        🎉 Criar Conta
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.88rem;color:var(--dim);">
+      Já tem conta?
+      <a href="{{ url_for('auth.login') }}" style="color:var(--accent);font-weight:600;">Fazer login</a>
+    </p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+  // Live password match check
+  const pw = document.getElementById('password');
+  const cpw = document.getElementById('confirm_password');
+  const msg = document.getElementById('pw-match');
+  function checkMatch() {
+    if (!cpw.value) { msg.style.display='none'; return; }
+    msg.style.display = 'block';
+    if (pw.value === cpw.value) {
+      msg.textContent = '✅ Senhas coincidem';
+      msg.style.color = 'var(--green)';
+    } else {
+      msg.textContent = '❌ Senhas não coincidem';
+      msg.style.color = 'var(--red)';
+    }
+  }
+  pw.addEventListener('input', checkMatch);
+  cpw.addEventListener('input', checkMatch);
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — NutriTrack</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>🥗 NutriTrack</h1>
+      <p>Controle nutricional inteligente</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label class="form-label">📧 E-mail</label>
+        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔒 Senha</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" name="remember" id="remember" style="accent-color:var(--accent);width:16px;height:16px;" />
+        <label for="remember" style="font-size:.88rem;color:var(--dim);cursor:pointer;">Manter conectado</label>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">
+        Entrar →
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.88rem;color:var(--dim);">
+      Não tem conta?
+      <a href="{{ url_for('auth.register') }}" style="color:var(--accent);font-weight:600;">Criar conta grátis</a>
+    </p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

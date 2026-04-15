@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}TMB & Metas{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">📊 Calculadora de TMB & Metas</h1>
+    <p class="page-subtitle">Descubra quantas calorias você precisa por dia</p>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <!-- Formulário -->
+    <div class="card">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:20px;color:var(--accent);">Seus dados</h2>
+      <form method="POST" action="{{ url_for('main.bmr') }}">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">⚖️ Peso (kg)</label>
+            <input type="number" name="weight" step="0.1" min="30" max="300"
+                   class="form-control" value="{{ user.weight_kg or '' }}" placeholder="ex: 75" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">📏 Altura (cm)</label>
+            <input type="number" name="height" step="0.1" min="100" max="250"
+                   class="form-control" value="{{ user.height_cm or '' }}" placeholder="ex: 170" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🎂 Idade (anos)</label>
+          <input type="number" name="age" min="10" max="120"
+                 class="form-control" value="{{ user.age or '' }}" placeholder="ex: 30" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🧬 Sexo</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="sex" value="M" {% if not user.sex or user.sex == 'M' %}checked{% endif %} />
+              ♂ Masculino
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="sex" value="F" {% if user.sex == 'F' %}checked{% endif %} />
+              ♀ Feminino
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🏃 Nível de Atividade Física</label>
+          <select name="activity" class="form-control" required>
+            {% for level in activity_levels %}
+              <option value="{{ level }}" {% if user.activity_level == level %}selected{% endif %}>{{ level }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🎯 Objetivo</label>
+          <select name="goal" class="form-control" required>
+            {% for g in goals %}
+              <option value="{{ g }}" {% if user.goal == g %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          📊 Calcular e Salvar Perfil
+        </button>
+      </form>
+    </div>
+
+    <!-- Resultados -->
+    <div>
+      {% if result %}
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent);">📋 Seus Resultados</h2>
+        <div class="result-grid">
+          <div class="result-card" style="border-color:var(--{{ result.bmi_color }});">
+            <div class="result-label">IMC</div>
+            <div class="result-value" style="color:var(--{{ result.bmi_color }});">{{ result.bmi }}</div>
+            <div style="font-size:.75rem;color:var(--dim);margin-top:4px;">{{ result.bmi_class }}</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">🔥 TMB</div>
+            <div class="result-value" style="color:var(--accent);">{{ result.bmr }}</div>
+            <div style="font-size:.75rem;color:var(--dim);">kcal/dia em repouso</div>
+          </div>
+          <div class="result-card pink">
+            <div class="result-label">⚡ TDEE</div>
+            <div class="result-value" style="color:var(--accent2);">{{ result.tdee }}</div>
+            <div style="font-size:.75rem;color:var(--dim);">kcal/dia gasto total</div>
+          </div>
+          <div class="result-card green">
+            <div class="result-label">🎯 Meta Calórica</div>
+            <div class="result-value" style="color:var(--green);">{{ result.goal_kcal }}</div>
+            <div style="font-size:.75rem;color:var(--dim);">kcal/dia para seu objetivo</div>
+          </div>
+        </div>
+        <div class="result-card yellow" style="margin-top:12px;">
+          <div class="result-label">💪 Meta de Proteína</div>
+          <div class="result-value" style="color:var(--yellow);">{{ result.protein_goal }} <span style="font-size:1rem;font-weight:400;color:var(--dim);">g/dia</span></div>
+        </div>
+        <div class="tip-box">
+          💡 Com <strong>{{ result.goal_kcal }} kcal/dia</strong> e <strong>{{ result.protein_goal }}g de proteína</strong>, você atingirá seu objetivo de forma saudável e sustentável.
+        </div>
+      </div>
+      {% elif user.goal_kcal %}
+      <!-- Exibir perfil já salvo -->
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent);">📋 Perfil Salvo</h2>
+        <div class="result-grid">
+          <div class="result-card green">
+            <div class="result-label">🎯 Meta Calórica</div>
+            <div class="result-value" style="color:var(--green);">{{ user.goal_kcal }}</div>
+            <div style="font-size:.75rem;color:var(--dim);">kcal/dia</div>
+          </div>
+          <div class="result-card yellow">
+            <div class="result-label">💪 Meta Proteína</div>
+            <div class="result-value" style="color:var(--yellow);">{{ user.protein_goal }}</div>
+            <div style="font-size:.75rem;color:var(--dim);">g/dia</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:.85rem;color:var(--dim);">
+          Objetivo: <strong style="color:var(--text);">{{ user.goal }}</strong>
+        </div>
+      </div>
+      {% else %}
+      <div class="card" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:3rem;margin-bottom:12px;">📊</div>
+        <p style="color:var(--dim);">Preencha seus dados ao lado e clique em <strong>Calcular</strong> para ver seus resultados.</p>
+      </div>
+      {% endif %}
+
+      <!-- Calculadora de Porção -->
+      <div class="card portion-calc">
+        <h3 style="font-size:.95rem;font-weight:700;color:var(--accent2);margin-bottom:4px;">🔢 Calculadora de Calorias</h3>
+        <p style="font-size:.8rem;color:var(--dim);margin-bottom:10px;">Quantas calorias tem X gramas de um alimento?</p>
+        <div class="portion-row">
+          <div class="form-group">
+            <label class="form-label">kcal / 100g</label>
+            <input type="number" id="p-kcal100" class="form-control" placeholder="ex: 89" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prot / 100g (g)</label>
+            <input type="number" id="p-prot100" class="form-control" placeholder="ex: 1.1" step="0.1" />
+          </div>
+        </div>
+        <div class="portion-row">
+          <div class="form-group">
+            <label class="form-label">Quantidade (g)</label>
+            <input type="number" id="p-qty" class="form-control" placeholder="ex: 150" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ou: meta de kcal</label>
+            <input type="number" id="p-target" class="form-control" placeholder="ex: 200" step="0.1" />
+          </div>
+          <div class="form-group" style="flex:0;">
+            <label class="form-label" style="visibility:hidden;">.</label>
+            <button class="btn btn-secondary" id="portion-calc-btn">▶ Calcular</button>
+          </div>
+        </div>
+        <div id="portion-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

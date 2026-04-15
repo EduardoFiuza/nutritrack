@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Banco de Alimentos{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 class="page-title">🗄️ Banco de Alimentos</h1>
+      <p class="page-subtitle">{{ foods|length }} alimento(s) encontrado(s)</p>
+    </div>
+    <button class="btn btn-success" onclick="document.getElementById('add-modal').style.display='flex'">
+      ➕ Novo Alimento
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <form method="GET" class="food-searchbar">
+    <input type="text" name="q" class="form-control" placeholder="🔍 Buscar alimento..." value="{{ search }}" />
+    <select name="category" class="form-control" style="max-width:200px;" onchange="this.form.submit()">
+      <option value="">Todas as categorias</option>
+      {% for cat in categories %}
+        <option value="{{ cat }}" {% if selected_cat == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {% if search or selected_cat %}
+      <a href="{{ url_for('main.foods') }}" class="btn btn-secondary">✕ Limpar</a>
+    {% endif %}
+  </form>
+
+  <!-- Tabela -->
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Alimento</th>
+            <th>kcal / 100g</th>
+            <th>Proteína / 100g</th>
+            <th class="hide-mobile">Categoria</th>
+            <th class="hide-mobile">Tipo</th>
+            <th style="text-align:center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for food in foods %}
+          <tr>
+            <td><strong>{{ food.name }}</strong></td>
+            <td style="color:var(--yellow);">{{ food.kcal_per_100g }}</td>
+            <td style="color:var(--green);">{{ food.protein_per_100g }}g</td>
+            <td class="hide-mobile">
+              <span class="badge badge-purple">{{ food.category }}</span>
+            </td>
+            <td class="hide-mobile">
+              {% if food.user_id == None %}
+                <span class="badge badge-green">Global</span>
+              {% else %}
+                <span class="badge badge-yellow">Meu</span>
+              {% endif %}
+            </td>
+            <td style="text-align:center;">
+              {% if food.user_id == current_user.id %}
+              <button class="btn btn-secondary btn-sm btn-icon"
+                      onclick="openEdit({{ food.id }}, '{{ food.name }}', {{ food.kcal_per_100g }}, {{ food.protein_per_100g }}, '{{ food.category }}')"
+                      title="Editar">✏️</button>
+              <form method="POST" action="{{ url_for('main.delete_food', food_id=food.id) }}"
+                    style="display:inline;" onsubmit="return confirm('Excluir {{ food.name }}?')">
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir">🗑️</button>
+              </form>
+              {% else %}
+              <span style="font-size:.75rem;color:var(--dim);">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align:center;padding:32px;color:var(--dim);">
+              Nenhum alimento encontrado. <a href="{{ url_for('main.foods') }}">Limpar filtros</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adicionar -->
+<div id="add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;">
+  <div class="card" style="width:100%;max-width:460px;">
+    <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px;color:var(--green);">➕ Adicionar Alimento</h2>
+    <form method="POST" action="{{ url_for('main.add_food') }}">
+      <div class="form-group">
+        <label class="form-label">Nome do Alimento *</label>
+        <input type="text" name="name" class="form-control" placeholder="ex: Banana" required autofocus />
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">kcal por 100g *</label>
+          <input type="number" name="kcal" step="0.1" min="0" class="form-control" placeholder="ex: 89" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proteína por 100g (g) *</label>
+          <input type="number" name="protein" step="0.1" min="0" class="form-control" placeholder="ex: 1.1" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select name="category" class="form-control">
+          {% for cat in ['Frutas','Vegetais','Cereais','Carnes','Laticínios','Gorduras','Outros'] %}
+            <option>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="submit" class="btn btn-success" style="flex:1;">💾 Salvar</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-modal').style.display='none'">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Editar -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;">
+  <div class="card" style="width:100%;max-width:460px;">
+    <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px;color:var(--accent);">✏️ Editar Alimento</h2>
+    <form method="POST" id="edit-form">
+      <div class="form-group">
+        <label class="form-label">Nome *</label>
+        <input type="text" name="name" id="edit-name" class="form-control" required />
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">kcal / 100g *</label>
+          <input type="number" name="kcal" id="edit-kcal" step="0.1" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proteína / 100g *</label>
+          <input type="number" name="protein" id="edit-protein" step="0.1" class="form-control" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select name="category" id="edit-cat" class="form-control">
+          {% for cat in ['Frutas','Vegetais','Cereais','Carnes','Laticínios','Gorduras','Outros'] %}
+            <option>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;">✅ Atualizar</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-modal').style.display='none'">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEdit(id, name, kcal, protein, category) {
+  document.getElementById('edit-form').action = `/foods/edit/${id}`;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-kcal').value = kcal;
+  document.getElementById('edit-protein').value = protein;
+  document.getElementById('edit-cat').value = category;
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+// Close modals on backdrop click
+['add-modal','edit-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+});
+</script>
+{% endblock %}

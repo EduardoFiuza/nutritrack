@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Olá, {{ current_user.name.split()[0] }}! 👋</h1>
+    <p class="page-subtitle">Resumo de hoje — {{ today }}</p>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="grid-3" style="margin-bottom:24px;">
+    <div class="card stat-card">
+      <div class="card-title">🔥 Calorias Hoje</div>
+      <div class="card-value" style="color:var(--yellow);">
+        {{ total_kcal }} <span class="card-unit">kcal</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Consumido</span><span>Meta: {{ goal_kcal }} kcal</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill {% if pct_kcal >= 100 %}over{% endif %}"
+               data-width="{{ pct_kcal }}" style="width:0%"></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--dim);margin-top:4px;">{{ pct_kcal }}% da meta diária</div>
+      </div>
+    </div>
+
+    <div class="card stat-card green">
+      <div class="card-title">💪 Proteína Hoje</div>
+      <div class="card-value" style="color:var(--green);">
+        {{ total_prot }} <span class="card-unit">g</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Consumido</span><span>Meta: {{ goal_prot }}g</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill {% if pct_prot >= 100 %}over{% endif %}"
+               data-width="{{ pct_prot }}" style="width:0%"></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--dim);margin-top:4px;">{{ pct_prot }}% da meta diária</div>
+      </div>
+    </div>
+
+    <div class="card stat-card yellow">
+      <div class="card-title">🍽️ Refeições hoje</div>
+      <div class="card-value" style="color:var(--accent);">{{ summary|length }}</div>
+      <div style="margin-top:12px;">
+        {% for meal_type in meal_types %}
+          {% if meal_type in summary %}
+            <span class="badge badge-purple" style="margin:2px;">{{ meal_type }}</span>
+          {% endif %}
+        {% endfor %}
+        {% if not summary %}
+          <p style="color:var(--dim);font-size:.85rem;margin-top:6px;">Nenhuma refeição ainda.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Saldo calórico -->
+  {% if current_user.goal_kcal %}
+  {% set saldo = (goal_kcal - total_kcal)|round(1) %}
+  <div class="card" style="margin-bottom:24px;background:{% if saldo >= 0 %}rgba(67,233,123,.06){% else %}rgba(255,71,87,.06){% endif %};border-color:{% if saldo >= 0 %}rgba(67,233,123,.3){% else %}rgba(255,71,87,.3){% endif %};">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:.8rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;">Saldo calórico de hoje</div>
+        <div style="font-size:1.8rem;font-weight:800;color:{% if saldo >= 0 %}var(--green){% else %}var(--red){% endif %};">
+          {% if saldo >= 0 %}–{{ saldo }} kcal restantes{% else %}+{{ (saldo * -1) }} kcal acima da meta{% endif %}
+        </div>
+      </div>
+      <a href="{{ url_for('main.meals') }}" class="btn btn-primary">➕ Adicionar Refeição</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="card" style="margin-bottom:24px;text-align:center;padding:28px;">
+    <p style="color:var(--dim);margin-bottom:12px;">📊 Calcule sua TMB para ver suas metas personalizadas.</p>
+    <a href="{{ url_for('main.bmr') }}" class="btn btn-primary">Calcular agora →</a>
+  </div>
+  {% endif %}
+
+  <!-- Resumo das refeições -->
+  {% if summary %}
+  <h2 style="font-size:1.1rem;font-weight:700;color:var(--dim);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;">Refeições de hoje</h2>
+  {% set colors = ['#f9ca24','#6c63ff','#43e97b','#ff6584','#48dbfb','#a29bfe'] %}
+  {% for meal_type in meal_types %}
+    {% if meal_type in summary %}
+    {% set m = summary[meal_type] %}
+    {% set ci = loop.index0 % colors|length %}
+    <div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-name">
+          <div class="meal-dot" style="background:{{ colors[ci] }};"></div>
+          {{ meal_type }}
+        </div>
+        <div class="meal-total">🔥 {{ m.total_kcal }} kcal &nbsp;|&nbsp; 💪 {{ m.total_prot }}g</div>
+      </div>
+      <div class="meal-items">
+        {% for item in m.items %}
+        <div class="meal-item">
+          <div>
+            <div class="meal-item-name">{{ item.name }}</div>
+            <div class="meal-item-qty">{{ item.quantity_g }}g</div>
+          </div>
+          <div class="meal-item-stats">
+            <span style="color:var(--yellow);">🔥 {{ item.kcal }} kcal</span>
+            <span style="color:var(--green);">💪 {{ item.prot }}g</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% else %}
+  <div style="text-align:center;padding:40px 20px;color:var(--dim);">
+    <div style="font-size:3rem;margin-bottom:12px;">🍽️</div>
+    <p style="font-size:1rem;margin-bottom:16px;">Você ainda não registrou nenhuma refeição hoje.</p>
+    <a href="{{ url_for('main.meals') }}" class="btn btn-success">Começar agora →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

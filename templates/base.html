@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}NutriTrack{% endblock %} — Controle Nutricional</title>
+  <meta name="description" content="Controle suas calorias, proteínas e refeições com o NutriTrack." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
+  {% block head %}{% endblock %}
+  <style>
+    /* Dropdown autocomplete */
+    .dropdown-wrap { position: relative; }
+    #food-dropdown {
+      display: none;
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 0 0 10px 10px; max-height: 260px; overflow-y: auto;
+    }
+    .dropdown-item {
+      padding: 10px 14px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 8px; flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .dropdown-item:hover { background: var(--border); }
+    .dropdown-item:last-child { border-bottom: none; }
+    .di-name { font-weight: 600; font-size: .9rem; }
+    .di-stats { font-size: .8rem; color: var(--dim); display: flex; gap: 8px; align-items: center; }
+    #add-preview {
+      display: none; margin-top: 8px;
+      font-size: .9rem; font-weight: 600; color: var(--green);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">🥗 NutriTrack</a>
+
+    <ul class="navbar-nav" id="nav-menu">
+      <li><a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+             href="{{ url_for('main.dashboard') }}">🏠 Dashboard</a></li>
+      <li><a class="nav-link {% if request.endpoint == 'main.bmr' %}active{% endif %}"
+             href="{{ url_for('main.bmr') }}">📊 TMB & Metas</a></li>
+      <li><a class="nav-link {% if request.endpoint == 'main.foods' %}active{% endif %}"
+             href="{{ url_for('main.foods') }}">🗄️ Alimentos</a></li>
+      <li><a class="nav-link {% if request.endpoint == 'main.meals' %}active{% endif %}"
+             href="{{ url_for('main.meals') }}">🍽️ Refeições</a></li>
+    </ul>
+
+    <div class="navbar-user">
+      {% if current_user.is_authenticated %}
+      <div class="avatar">{{ current_user.name[0].upper() }}</div>
+      <span class="user-name" style="font-size:.9rem;color:var(--dim);">{{ current_user.name.split()[0] }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm">Sair</a>
+      {% endif %}
+      <div class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Alerts -->
+  <div style="padding: 0 16px; max-width:1200px; margin: 0 auto;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-top:12px;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Page Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

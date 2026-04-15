@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Refeições{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">🍽️ Refeições do Dia</h1>
+    <p class="page-subtitle">Registre o que você comeu</p>
+  </div>
+
+  <div class="grid-2" style="align-items:start;gap:24px;">
+
+    <!-- ── COLUNA ESQUERDA: Adicionar ──────────────────────────── -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--green);">➕ Adicionar Alimento</h2>
+
+        <form method="POST" action="{{ url_for('main.add_meal_item') }}" id="add-form">
+          <!-- Data -->
+          <div class="form-group">
+            <label class="form-label">📅 Data</label>
+            <div style="display:flex;gap:8px;">
+              <input type="date" name="date" class="form-control" value="{{ selected_date }}" required />
+              <button type="button" class="btn btn-secondary"
+                      onclick="document.querySelector('[name=date]').value='{{ selected_date }}'">Hoje</button>
+            </div>
+          </div>
+
+          <!-- Refeição -->
+          <div class="form-group">
+            <label class="form-label">🍽️ Refeição</label>
+            <select name="meal_type" class="form-control" required>
+              {% for mt in meal_types %}
+                <option>{{ mt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Busca de alimento -->
+          <div class="form-group">
+            <label class="form-label">🔍 Alimento</label>
+            <div class="dropdown-wrap">
+              <input type="text" id="food-search" class="form-control"
+                     placeholder="Digite para buscar..." autocomplete="off" />
+              <div id="food-dropdown"></div>
+              <input type="hidden" name="food_id" id="food_id" required />
+            </div>
+          </div>
+
+          <!-- Quantidade -->
+          <div class="form-group">
+            <label class="form-label">⚖️ Quantidade (g)</label>
+            <input type="number" name="quantity_g" id="quantity_g" class="form-control"
+                   placeholder="ex: 150" min="1" step="0.1" required value="100" />
+          </div>
+
+          <!-- Prévia -->
+          <div id="add-preview"></div>
+
+          <button type="submit" class="btn btn-success btn-block" style="margin-top:12px;">
+            ➕ Adicionar à Refeição
+          </button>
+        </form>
+      </div>
+
+      <!-- Mini calculadora de gramagem -->
+      <div class="card portion-calc">
+        <h3 style="font-size:.9rem;font-weight:700;color:var(--accent2);margin-bottom:4px;">🔢 Calcular porção</h3>
+        <p style="font-size:.78rem;color:var(--dim);margin-bottom:8px;">Selecione um alimento acima e informe a quantidade para ver os macros.</p>
+        <div id="portion-result" style="font-size:.9rem;font-weight:600;color:var(--green);min-height:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ── COLUNA DIREITA: Resumo do dia ──────────────────────── -->
+    <div>
+      <!-- Seletor de data -->
+      <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="date" name="date" class="form-control" value="{{ selected_date }}" />
+        <button type="submit" class="btn btn-secondary">Ver dia</button>
+      </form>
+
+      <!-- Totais do dia -->
+      <div class="card" style="margin-bottom:16px;background:var(--card2);">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;">
+          <div>
+            <div style="font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;">Total do dia</div>
+            <div style="font-size:1.6rem;font-weight:800;color:var(--yellow);">🔥 {{ total_kcal }} <span style="font-size:.9rem;font-weight:400;color:var(--dim);">kcal</span></div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--green);">💪 {{ total_prot }}g <span style="font-size:.85rem;font-weight:400;color:var(--dim);">proteína</span></div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:.75rem;color:var(--dim);">Meta diária</div>
+            <div style="color:var(--dim);">{{ goal_kcal }} kcal | {{ goal_prot }}g prot.</div>
+            {% set pct = [(total_kcal / goal_kcal * 100)|int, 100]|min if goal_kcal else 0 %}
+            <div class="progress-bar" style="width:140px;margin-top:8px;">
+              <div class="progress-fill {% if pct >= 100 %}over{% endif %}"
+                   data-width="{{ pct }}" style="width:0%;"></div>
+            </div>
+            <div style="font-size:.75rem;color:var(--dim);margin-top:4px;">{{ pct }}%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refeições -->
+      {% set colors = ['#f9ca24','#6c63ff','#43e97b','#ff6584','#48dbfb','#a29bfe'] %}
+      {% for meal_type in meal_types %}
+        {% if meal_type in summary %}
+        {% set m = summary[meal_type] %}
+        {% set ci = loop.index0 % colors|length %}
+        <div class="meal-card">
+          <div class="meal-header">
+            <div class="meal-name">
+              <div class="meal-dot" style="background:{{ colors[ci] }};"></div>
+              {{ meal_type }}
+            </div>
+            <div class="meal-total">🔥 {{ m.total_kcal }} kcal | 💪 {{ m.total_prot }}g</div>
+          </div>
+          <div class="meal-items">
+            {% for item in m.items %}
+            <div class="meal-item">
+              <div>
+                <div class="meal-item-name">{{ item.name }}</div>
+                <div class="meal-item-qty">{{ item.quantity_g }}g</div>
+              </div>
+              <div class="meal-item-stats">
+                <span style="color:var(--yellow);font-size:.82rem;">🔥 {{ item.kcal }}</span>
+                <span style="color:var(--green);font-size:.82rem;">💪 {{ item.prot }}g</span>
+                <form method="POST"
+                      action="{{ url_for('main.delete_meal_item', item_id=item.id) }}"
+                      onsubmit="return confirm('Remover este item?')" style="margin:0;">
+                  <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Remover">✕</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        <!-- Nenhum meal_type com dados -->
+      {% endfor %}
+
+      {% if not summary %}
+      <div style="text-align:center;padding:36px 20px;color:var(--dim);border:1px dashed var(--border);border-radius:var(--radius);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🍽️</div>
+        <p>Nenhuma refeição registrada para {{ selected_date }}.</p>
+        <p style="font-size:.85rem;margin-top:6px;">Use o formulário ao lado para adicionar alimentos.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
