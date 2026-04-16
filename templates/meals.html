@@ -47,21 +47,25 @@
             </div>
           </div>
 
-          <!-- Quantidade -->
+          <!-- Quantidade e Medida -->
           <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-               <label class="form-label" style="margin-bottom:0;">⚖️ Quantidade</label>
-               <div id="unit-mode-wrap" style="display:none; gap:10px; font-size:0.8rem;">
-                  <label style="cursor:pointer; display:flex; align-items:center; gap:4px;">
-                     <input type="radio" name="qty_mode" value="g" id="mode-grams" checked> Gramas
-                  </label>
-                  <label style="cursor:pointer; display:flex; align-items:center; gap:4px;">
-                     <input type="radio" name="qty_mode" value="unit"> <span id="unit-name-label">Unidade</span>
-                  </label>
-               </div>
+            <label class="form-label">⚖️ Quantidade</label>
+            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:8px;">
+               <input type="number" name="quantity_g" id="quantity_g" class="form-control"
+                      placeholder="Qtd" min="0.1" step="0.1" required value="100" />
+               <select id="measure-select" class="form-control">
+                  <option value="g">Gramas (g)</option>
+                  <option value="unit">Unidade</option>
+                  <option value="fatia">Fatia</option>
+                  <option value="colher">Colher (sopa)</option>
+               </select>
             </div>
-            <input type="number" name="quantity_g" id="quantity_g" class="form-control"
-                   placeholder="ex: 150" min="0.1" step="0.1" required value="100" />
+          </div>
+
+          <!-- Peso Customizado (Aparece se não for gramas) -->
+          <div id="custom-weight-wrap" style="display:none; margin-bottom:15px; padding:10px; background:rgba(0,0,0,0.15); border-radius:8px;">
+             <label class="form-label" style="font-size:0.8rem; color:var(--accent2);">Quanto pesa uma <span id="custom-unit-name">unidade</span>? (g)</label>
+             <input type="number" id="custom-weight" class="form-control" placeholder="Peso em gramas" step="0.1" />
           </div>
 
           <!-- Prévia -->
@@ -73,12 +77,7 @@
         </form>
       </div>
 
-      <!-- Mini calculadora de gramagem -->
-      <div class="card portion-calc">
-        <h3 style="font-size:.9rem;font-weight:700;color:var(--accent2);margin-bottom:4px;">🔢 Calcular porção</h3>
-        <p style="font-size:.78rem;color:var(--dim);margin-bottom:8px;">Selecione um alimento acima e informe a quantidade para ver os macros.</p>
-        <div id="portion-result" style="font-size:.9rem;font-weight:600;color:var(--green);min-height:20px;"></div>
-      </div>
+      <!-- Espaço removido da calculadora complexa -->
     </div>
 
     <!-- ── COLUNA DIREITA: Resumo do dia ──────────────────────── -->
@@ -175,15 +174,18 @@ document.addEventListener("DOMContentLoaded", function() {
       submitBtn.disabled = true;
 
       const formData = new FormData(addForm);
-      const selectedDate = formData.get("date");
       
-      // Lógica de conversão de Unidade -> Gramas antes de enviar
-      const mode = addForm.querySelector('input[name="qty_mode"]:checked')?.value || 'g';
-      if (mode === 'unit' && window.selectedFood && window.selectedFood.g_per_unit) {
+      // Conversão Unidade/Fatia -> Gramas
+      const measure = document.getElementById('measure-select').value;
+      if (measure !== 'g') {
           const unitQty = parseFloat(formData.get("quantity_g")) || 0;
-          const finalGrams = unitQty * window.selectedFood.g_per_unit;
-          formData.set("quantity_g", finalGrams.toFixed(1));
+          const weightPerUnit = parseFloat(document.getElementById('custom-weight').value) || 0;
+          if (weightPerUnit > 0) {
+              formData.set("quantity_g", (unitQty * weightPerUnit).toFixed(1));
+          }
       }
+
+      const selectedDate = formData.get("date");
 
       try {
         // Envia o form

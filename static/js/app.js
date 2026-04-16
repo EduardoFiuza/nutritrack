@@ -48,21 +48,30 @@ if (foodSearchInput) {
       item.innerHTML = `<span class="di-name">${f.name} ${unitInfo}</span>
         <span class="di-stats">${f.kcal} kcal | ${f.prot}g prot</span>`;
       item.addEventListener('click', () => {
-        selectedFood = f;
+        window.selectedFood = f;
         foodSearchInput.value = f.name;
         foodIdInput.value = f.id;
         foodDropdown.style.display = 'none';
         
-        // Se tem unidade, mostra o seletor de modo
-        const unitWrap = document.getElementById('unit-mode-wrap');
-        if (unitWrap) {
-           if (f.unit_name) {
-               unitWrap.style.display = 'flex';
-               document.getElementById('unit-name-label').textContent = f.unit_name;
-           } else {
-               unitWrap.style.display = 'none';
-               document.getElementById('mode-grams').checked = true;
-           }
+        // Sugerir a unidade caso o alimento tenha uma pré-definida
+        const measureSelect = document.getElementById('measure-select');
+        if (measureSelect) {
+            if (f.unit_name) {
+                // Tenta selecionar a opção 'unit' (Unidade)
+                measureSelect.value = 'unit';
+                document.getElementById('custom-unit-name').textContent = f.unit_name;
+                
+                // Se temos o peso salvo, já preenchemos
+                if (f.g_per_unit) {
+                    document.getElementById('custom-weight').value = f.g_per_unit;
+                } else {
+                    document.getElementById('custom-weight').value = '';
+                }
+            } else {
+                measureSelect.value = 'g';
+            }
+            // Disparar evento de mudança para atualizar visibilidade
+            measureSelect.dispatchEvent(new Event('change'));
         }
         updatePreview();
       });
@@ -78,36 +87,60 @@ if (foodSearchInput) {
   });
 }
 
-// Escutar mudanças no modo (Gramas vs Unidade)
-document.querySelectorAll('input[name="qty_mode"]').forEach(radio => {
-  radio.addEventListener('change', updatePreview);
-});
+// Escutar mudanças no seletor de medida (Grama vs Unidade/Fatia/etc)
+const measureSelect = document.getElementById('measure-select');
+if (measureSelect) {
+    measureSelect.addEventListener('change', () => {
+        const val = measureSelect.value;
+        const weightWrap = document.getElementById('custom-weight-wrap');
+        const unitLabel = document.getElementById('custom-unit-name');
+        
+        if (val === 'g') {
+            weightWrap.style.display = 'none';
+        } else {
+            weightWrap.style.display = 'block';
+            unitLabel.textContent = measureSelect.options[measureSelect.selectedIndex].text.toLowerCase();
+        }
+        updatePreview();
+    });
+}
+
+const customWeightInput = document.getElementById('custom-weight');
+if (customWeightInput) {
+    customWeightInput.addEventListener('input', updatePreview);
+}
 
 if (qtyInput) {
   qtyInput.addEventListener('input', updatePreview);
 }
 
 function updatePreview() {
-  if (!selectedFood || !qtyInput) return;
+  if (!window.selectedFood || !qtyInput) return;
   
-  const mode = document.querySelector('input[name="qty_mode"]:checked')?.value || 'g';
+  const measure = document.getElementById('measure-select').value;
   let qty = parseFloat(qtyInput.value) || 0;
   let displayQty = qty;
   let unitLabel = 'g';
 
-  if (mode === 'unit' && selectedFood.g_per_unit) {
-    qty = qty * selectedFood.g_per_unit; // Converte para gramas para o cálculo
-    unitLabel = selectedFood.unit_name;
+  if (measure !== 'g') {
+    const weightPerUnit = parseFloat(document.getElementById('custom-weight').value) || 0;
+    qty = qty * weightPerUnit; // Converte para gramas para o cálculo
+    unitLabel = document.getElementById('measure-select').options[document.getElementById('measure-select').selectedIndex].text;
   }
 
-  const kcal = (selectedFood.kcal * qty / 100).toFixed(1);
-  const prot = (selectedFood.prot * qty / 100).toFixed(1);
+  const kcal = (window.selectedFood.kcal * qty / 100).toFixed(1);
+  const prot = (window.selectedFood.prot * qty / 100).toFixed(1);
   
   if (previewDiv) {
-    if (mode === 'unit') {
-        previewDiv.textContent = `➡ ${displayQty} ${unitLabel} (${qty.toFixed(0)}g) → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+    if (measure !== 'g') {
+       const weightPerUnit = parseFloat(document.getElementById('custom-weight').value) || 0;
+       if (weightPerUnit > 0) {
+          previewDiv.textContent = `➡ ${displayQty} ${unitLabel} (${qty.toFixed(0)}g) → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+       } else {
+          previewDiv.textContent = `⚠ Informe o peso de 1 ${unitLabel.toLowerCase()} para calcular.`;
+       }
     } else {
-        previewDiv.textContent = `➡ ${qty}g de ${selectedFood.name} → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+        previewDiv.textContent = `➡ ${qty}g de ${window.selectedFood.name} → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
     }
     previewDiv.style.display = 'block';
   }
