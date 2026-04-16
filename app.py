@@ -29,6 +29,11 @@ def create_app():
     login_manager.login_message = "Por favor, faça login para acessar esta página."
     login_manager.login_message_category = "warning"
 
+    # Context Processor para ambiente
+    @app.context_processor
+    def inject_env():
+        return dict(app_env=os.environ.get("APP_ENV", "production").lower())
+
     # Blueprints
     from auth import auth_bp
     from routes import main_bp

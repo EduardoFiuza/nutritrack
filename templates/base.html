@@ -35,6 +35,11 @@
   </style>
 </head>
 <body>
+  {% if app_env != 'production' %}
+  <div style="background-color: var(--yellow); color: var(--bg); text-align: center; font-weight: bold; font-size: 0.85rem; padding: 6px; z-index: 9999; position: relative;">
+    🚧 AMBIENTE DE HOMOLOGAÇÃO (TESTES) 🚧
+  </div>
+  {% endif %}
   <!-- Navbar -->
   <nav class="navbar">
     <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">🥗 NutriTrack</a>
