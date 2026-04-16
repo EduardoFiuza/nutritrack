@@ -38,7 +38,7 @@
             <th>kcal / 100g</th>
             <th>Proteína / 100g</th>
             <th class="hide-mobile">Categoria</th>
-            <th class="hide-mobile">Tipo</th>
+            <th class="hide-mobile">Medida</th>
             <th style="text-align:center;">Ações</th>
           </tr>
         </thead>
@@ -52,16 +52,16 @@
               <span class="badge badge-purple">{{ food.category }}</span>
             </td>
             <td class="hide-mobile">
-              {% if food.user_id == None %}
-                <span class="badge badge-green">Global</span>
+              {% if food.unit_name %}
+                <span style="font-size: 0.85rem; color: var(--accent2);">{{ food.unit_name }} ({{ food.g_per_unit }}g)</span>
               {% else %}
-                <span class="badge badge-yellow">Meu</span>
+                <span style="color: var(--dim); font-size: 0.8rem;">Apenas gramas</span>
               {% endif %}
             </td>
             <td style="text-align:center;">
               {% if food.user_id == current_user.id %}
               <button class="btn btn-secondary btn-sm btn-icon"
-                      onclick="openEdit({{ food.id }}, '{{ food.name }}', {{ food.kcal_per_100g }}, {{ food.protein_per_100g }}, '{{ food.category }}')"
+                      onclick="openEdit({{ food.id }}, '{{ food.name }}', {{ food.kcal_per_100g }}, {{ food.protein_per_100g }}, '{{ food.category }}', '{{ food.unit_name or '' }}', '{{ food.g_per_unit or '' }}')"
                       title="Editar">✏️</button>
               <form method="POST" action="{{ url_for('main.delete_food', food_id=food.id) }}"
                     style="display:inline;" onsubmit="return confirm('Excluir {{ food.name }}?')">
@@ -112,6 +112,19 @@
           {% endfor %}
         </select>
       </div>
+      <div class="card" style="padding: 12px; background: rgba(0,0,0,0.1); margin-bottom: 12px;">
+        <label class="form-label" style="font-size: 0.85rem; color: var(--accent2);">🏠 Medida Caseira (Opcional)</label>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.75rem;">Nome (ex: Fatia)</label>
+            <input type="text" name="unit_name" class="form-control" placeholder="Unidade" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.75rem;">Peso (g)</label>
+            <input type="number" name="g_per_unit" step="0.1" class="form-control" placeholder="ex: 20" />
+          </div>
+        </div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button type="submit" class="btn btn-success" style="flex:1;">💾 Salvar</button>
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-modal').style.display='none'">Cancelar</button>
@@ -147,6 +160,19 @@
           {% endfor %}
         </select>
       </div>
+      <div class="card" style="padding: 12px; background: rgba(0,0,0,0.1); margin-bottom: 12px;">
+        <label class="form-label" style="font-size: 0.85rem; color: var(--accent2);">🏠 Medida Caseira (Opcional)</label>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.75rem;">Nome (ex: Fatia)</label>
+            <input type="text" name="unit_name" id="edit-unit-name" class="form-control" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.75rem;">Peso (g)</label>
+            <input type="number" name="g_per_unit" id="edit-g-unit" step="0.1" class="form-control" />
+          </div>
+        </div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button type="submit" class="btn btn-primary" style="flex:1;">✅ Atualizar</button>
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-modal').style.display='none'">Cancelar</button>
@@ -159,12 +185,14 @@
 
 {% block scripts %}
 <script>
-function openEdit(id, name, kcal, protein, category) {
+function openEdit(id, name, kcal, protein, category, unitName, gPerUnit) {
   document.getElementById('edit-form').action = `/foods/edit/${id}`;
   document.getElementById('edit-name').value = name;
   document.getElementById('edit-kcal').value = kcal;
   document.getElementById('edit-protein').value = protein;
   document.getElementById('edit-cat').value = category;
+  document.getElementById('edit-unit-name').value = unitName;
+  document.getElementById('edit-g-unit').value = gPerUnit;
   document.getElementById('edit-modal').style.display = 'flex';
 }
 // Close modals on backdrop click

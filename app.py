@@ -40,13 +40,35 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
 
-    # Criar tabelas + seed
+    # Criar tabelas + seed + migrações manuais
     with app.app_context():
         from models import User, Food, DietDay, Meal, MealItem
         db.create_all()
+        # Migração manual de colunas novas (caso existam)
+        _run_manual_migrations()
         _seed_foods()
-
+    
     return app
+
+def _run_manual_migrations():
+    from extensions import db
+    from sqlalchemy import text
+    try:
+        # Tenta adicionar as colunas se não existirem (Postgres/SQLite)
+        # O 'IF NOT EXISTS' não funciona no SQLite antigo, então usamos try/except
+        try:
+            db.session.execute(text("ALTER TABLE foods ADD COLUMN unit_name VARCHAR(50)"))
+        except:
+            db.session.rollback()
+        
+        try:
+            db.session.execute(text("ALTER TABLE foods ADD COLUMN g_per_unit FLOAT"))
+        except:
+            db.session.rollback()
+        
+        db.session.commit()
+    except Exception as e:
+        print("Migração automática ignorada ou já realizada:", str(e))
 
 
 def _seed_foods():

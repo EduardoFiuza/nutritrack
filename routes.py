@@ -120,12 +120,16 @@ def add_food():
         kcal = float(request.form["kcal"].replace(",", "."))
         protein = float(request.form["protein"].replace(",", "."))
         category = request.form.get("category", "Outros")
+        unit_name = request.form.get("unit_name", "").strip() or None
+        g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
+        g_per_unit = float(g_per_unit) if g_per_unit else None
     except (ValueError, KeyError):
         flash("Preencha todos os campos corretamente.", "danger")
         return redirect(url_for("main.foods"))
 
     food = Food(name=name, kcal_per_100g=kcal,
                 protein_per_100g=protein, category=category,
+                unit_name=unit_name, g_per_unit=g_per_unit,
                 user_id=current_user.id)
     db.session.add(food)
     db.session.commit()
@@ -151,6 +155,12 @@ def edit_food(food_id):
     food.kcal_per_100g = float(request.form["kcal"].replace(",", "."))
     food.protein_per_100g = float(request.form["protein"].replace(",", "."))
     food.category = request.form.get("category", "Outros")
+    
+    unit_name = request.form.get("unit_name", "").strip() or None
+    g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
+    food.unit_name = unit_name
+    food.g_per_unit = float(g_per_unit) if g_per_unit else None
+    
     db.session.commit()
     flash("Alimento atualizado! ✅", "success")
     return redirect(url_for("main.foods"))
@@ -263,7 +273,9 @@ def api_foods():
     return jsonify([{
         "id": f.id, "name": f.name,
         "kcal": f.kcal_per_100g, "prot": f.protein_per_100g,
-        "category": f.category
+        "category": f.category,
+        "unit_name": f.unit_name,
+        "g_per_unit": f.g_per_unit
     } for f in foods])
 
 

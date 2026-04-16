@@ -49,9 +49,19 @@
 
           <!-- Quantidade -->
           <div class="form-group">
-            <label class="form-label">⚖️ Quantidade (g)</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+               <label class="form-label" style="margin-bottom:0;">⚖️ Quantidade</label>
+               <div id="unit-mode-wrap" style="display:none; gap:10px; font-size:0.8rem;">
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:4px;">
+                     <input type="radio" name="qty_mode" value="g" id="mode-grams" checked> Gramas
+                  </label>
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:4px;">
+                     <input type="radio" name="qty_mode" value="unit"> <span id="unit-name-label">Unidade</span>
+                  </label>
+               </div>
+            </div>
             <input type="number" name="quantity_g" id="quantity_g" class="form-control"
-                   placeholder="ex: 150" min="1" step="0.1" required value="100" />
+                   placeholder="ex: 150" min="0.1" step="0.1" required value="100" />
           </div>
 
           <!-- Prévia -->
@@ -166,6 +176,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
       const formData = new FormData(addForm);
       const selectedDate = formData.get("date");
+      
+      // Lógica de conversão de Unidade -> Gramas antes de enviar
+      const mode = addForm.querySelector('input[name="qty_mode"]:checked')?.value || 'g';
+      if (mode === 'unit' && window.selectedFood && window.selectedFood.g_per_unit) {
+          const unitQty = parseFloat(formData.get("quantity_g")) || 0;
+          const finalGrams = unitQty * window.selectedFood.g_per_unit;
+          formData.set("quantity_g", finalGrams.toFixed(1));
+      }
 
       try {
         // Envia o form

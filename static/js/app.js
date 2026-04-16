@@ -44,13 +44,26 @@ if (foodSearchInput) {
     foods.forEach(f => {
       const item = document.createElement('div');
       item.className = 'dropdown-item';
-      item.innerHTML = `<span class="di-name">${f.name}</span>
-        <span class="di-stats">${f.kcal} kcal | ${f.prot}g prot <small class="badge badge-purple">${f.category}</small></span>`;
+      let unitInfo = f.unit_name ? `<span class="badge badge-purple">${f.unit_name}</span>` : '';
+      item.innerHTML = `<span class="di-name">${f.name} ${unitInfo}</span>
+        <span class="di-stats">${f.kcal} kcal | ${f.prot}g prot</span>`;
       item.addEventListener('click', () => {
         selectedFood = f;
         foodSearchInput.value = f.name;
         foodIdInput.value = f.id;
         foodDropdown.style.display = 'none';
+        
+        // Se tem unidade, mostra o seletor de modo
+        const unitWrap = document.getElementById('unit-mode-wrap');
+        if (unitWrap) {
+           if (f.unit_name) {
+               unitWrap.style.display = 'flex';
+               document.getElementById('unit-name-label').textContent = f.unit_name;
+           } else {
+               unitWrap.style.display = 'none';
+               document.getElementById('mode-grams').checked = true;
+           }
+        }
         updatePreview();
       });
       foodDropdown.appendChild(item);
@@ -65,17 +78,37 @@ if (foodSearchInput) {
   });
 }
 
+// Escutar mudanças no modo (Gramas vs Unidade)
+document.querySelectorAll('input[name="qty_mode"]').forEach(radio => {
+  radio.addEventListener('change', updatePreview);
+});
+
 if (qtyInput) {
   qtyInput.addEventListener('input', updatePreview);
 }
 
 function updatePreview() {
   if (!selectedFood || !qtyInput) return;
-  const qty = parseFloat(qtyInput.value) || 0;
+  
+  const mode = document.querySelector('input[name="qty_mode"]:checked')?.value || 'g';
+  let qty = parseFloat(qtyInput.value) || 0;
+  let displayQty = qty;
+  let unitLabel = 'g';
+
+  if (mode === 'unit' && selectedFood.g_per_unit) {
+    qty = qty * selectedFood.g_per_unit; // Converte para gramas para o cálculo
+    unitLabel = selectedFood.unit_name;
+  }
+
   const kcal = (selectedFood.kcal * qty / 100).toFixed(1);
   const prot = (selectedFood.prot * qty / 100).toFixed(1);
+  
   if (previewDiv) {
-    previewDiv.textContent = `➡ ${qty}g de ${selectedFood.name} → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+    if (mode === 'unit') {
+        previewDiv.textContent = `➡ ${displayQty} ${unitLabel} (${qty.toFixed(0)}g) → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+    } else {
+        previewDiv.textContent = `➡ ${qty}g de ${selectedFood.name} → 🔥 ${kcal} kcal | 💪 ${prot}g prot.`;
+    }
     previewDiv.style.display = 'block';
   }
 }
