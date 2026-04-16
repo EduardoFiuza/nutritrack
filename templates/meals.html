@@ -93,18 +93,18 @@
         <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;">
           <div>
             <div style="font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;">Total do dia</div>
-            <div style="font-size:1.6rem;font-weight:800;color:var(--yellow);">🔥 {{ total_kcal }} <span style="font-size:.9rem;font-weight:400;color:var(--dim);">kcal</span></div>
-            <div style="font-size:1.1rem;font-weight:700;color:var(--green);">💪 {{ total_prot }}g <span style="font-size:.85rem;font-weight:400;color:var(--dim);">proteína</span></div>
+            <div style="font-size:1.6rem;font-weight:800;color:var(--yellow);">🔥 <span id="total-kcal-val">{{ total_kcal }}</span> <span style="font-size:.9rem;font-weight:400;color:var(--dim);">kcal</span></div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--green);">💪 <span id="total-prot-val">{{ total_prot }}</span>g <span style="font-size:.85rem;font-weight:400;color:var(--dim);">proteína</span></div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:.75rem;color:var(--dim);">Meta diária</div>
-            <div style="color:var(--dim);">{{ goal_kcal }} kcal | {{ goal_prot }}g prot.</div>
+            <div style="color:var(--dim);"><span id="goal-kcal-val">{{ goal_kcal }}</span> kcal | {{ goal_prot }}g prot.</div>
             {% set pct = [(total_kcal / goal_kcal * 100)|int, 100]|min if goal_kcal else 0 %}
             <div class="progress-bar" style="width:140px;margin-top:8px;">
-              <div class="progress-fill {% if pct >= 100 %}over{% endif %}"
-                   data-width="{{ pct }}" style="width:0%;"></div>
+              <div id="progress-bar-fill" class="progress-fill {% if pct >= 100 %}over{% endif %}"
+                   data-width="{{ pct }}" style="width:{{ pct }}%;"></div>
             </div>
-            <div style="font-size:.75rem;color:var(--dim);margin-top:4px;">{{ pct }}%</div>
+            <div style="font-size:.75rem;color:var(--dim);margin-top:4px;"><span id="progress-percent">{{ pct }}</span>%</div>
           </div>
         </div>
       </div>
@@ -121,11 +121,14 @@
               <div class="meal-dot" style="background:{{ colors[ci] }};"></div>
               {{ meal_type }}
             </div>
-            <div class="meal-total">🔥 {{ m.total_kcal }} kcal | 💪 {{ m.total_prot }}g</div>
+            <div class="meal-total">
+               🔥 <span class="meal-kcal-val" data-meal="{{ meal_type }}">{{ m.total_kcal }}</span> | 
+               💪 <span class="meal-prot-val" data-meal="{{ meal_type }}">{{ m.total_prot }}</span>g
+            </div>
           </div>
           <div class="meal-items">
             {% for item in m['items'] %}
-            <div class="meal-item">
+            <div class="meal-item" id="meal-item-{{ item.id }}" data-kcal="{{ item.kcal }}" data-prot="{{ item.prot }}" data-meal="{{ meal_type }}">
               <div>
                 <div class="meal-item-name">{{ item.name }}</div>
                 <div class="meal-item-qty">{{ item.quantity_g }}g</div>
@@ -133,9 +136,9 @@
               <div class="meal-item-stats">
                 <span style="color:var(--yellow);font-size:.82rem;">🔥 {{ item.kcal }}</span>
                 <span style="color:var(--green);font-size:.82rem;">💪 {{ item.prot }}g</span>
-                <form method="POST"
+                <form method="POST" class="ajax-delete-form"
                       action="{{ url_for('main.delete_meal_item', item_id=item.id) }}"
-                      onsubmit="return confirm('Remover este item?')" style="margin:0;">
+                      style="margin:0;">
                   <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Remover">✕</button>
                 </form>
               </div>

@@ -258,8 +258,13 @@ def delete_meal_item(item_id):
         MealItem.id == item_id,
         DietDay.user_id == current_user.id
     ).first_or_404()
+    
     db.session.delete(item)
     db.session.commit()
+    
+    if request.headers.get('Accept') == 'application/json' or request.is_json:
+        return jsonify({"success": True, "message": "Item removido."})
+        
     flash("Item removido.", "info")
     return redirect(request.referrer or url_for("main.meals"))
 

@@ -188,12 +188,85 @@ if (bmrCalcBtn) {
   });
 }
 
-// ─── Confirm delete ───────────────────────────────────────────────────────────
-document.querySelectorAll('[data-confirm]').forEach(el => {
-  el.addEventListener('click', e => {
-    if (!confirm(el.dataset.confirm)) e.preventDefault();
-  });
+// ─── AJAX Deletion (meals page) ────────────────────────────────────────────────
+document.addEventListener('submit', async e => {
+  if (e.target.classList.contains('ajax-delete-form')) {
+    e.preventDefault();
+    if (!confirm('Remover este item?')) return;
+
+    const form = e.target;
+    const itemRow = form.closest('.meal-item');
+    if (!itemRow) return;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // 1. Extrair valores do item removido
+        const itemKcal = parseFloat(itemRow.dataset.kcal) || 0;
+        const itemProt = parseFloat(itemRow.dataset.prot) || 0;
+        const mealType = itemRow.dataset.meal;
+
+        // 2. Atualizar Totais do Dia
+        const totalKcalEl = document.getElementById('total-kcal-val');
+        const totalProtEl = document.getElementById('total-prot-val');
+        const currentTotalKcal = parseFloat(totalKcalEl.textContent) || 0;
+        const currentTotalProt = parseFloat(totalProtEl.textContent) || 0;
+        
+        const newTotalKcal = Math.max(0, currentTotalKcal - itemKcal);
+        const newTotalProt = Math.max(0, currentTotalProt - itemProt);
+        
+        totalKcalEl.textContent = newTotalKcal.toFixed(1);
+        totalProtEl.textContent = newTotalProt.toFixed(1);
+
+        // 3. Atualizar Totais da Refeição
+        const mealKcalEl = document.querySelector(`.meal-kcal-val[data-meal="${mealType}"]`);
+        const mealProtEl = document.querySelector(`.meal-prot-val[data-meal="${mealType}"]`);
+        if (mealKcalEl && mealProtEl) {
+           const currentMealKcal = parseFloat(mealKcalEl.textContent) || 0;
+           const currentMealProt = parseFloat(mealProtEl.textContent) || 0;
+           mealKcalEl.textContent = Math.max(0, currentMealKcal - itemKcal).toFixed(1);
+           mealProtEl.textContent = Math.max(0, currentMealProt - itemProt).toFixed(1);
+        }
+
+        // 4. Atualizar Barra de Progresso
+        const goalKcal = parseFloat(document.getElementById('goal-kcal-val')?.textContent) || 2000;
+        const pct = Math.min(100, Math.floor((newTotalKcal / goalKcal) * 100));
+        const progressFill = document.getElementById('progress-bar-fill');
+        const progressPct = document.getElementById('progress-percent');
+        if (progressFill) {
+            progressFill.style.width = pct + '%';
+            progressFill.dataset.width = pct;
+            if (pct >= 100) progressFill.classList.add('over');
+            else progressFill.classList.remove('over');
+        }
+        if (progressPct) progressPct.textContent = pct;
+
+        // 5. Remover o elemento com animação
+        itemRow.style.transition = 'all 0.3s ease';
+        itemRow.style.opacity = '0';
+        itemRow.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+            const parent = itemRow.parentElement;
+            itemRow.remove();
+            // Se a refeição ficou vazia, poderíamos remover o card inteiro, mas manter é mais simples
+        }, 300);
+
+      } else {
+        alert('Erro ao remover item.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro de conexão.');
+    }
+  }
 });
+
+// ─── Confirm delete (generic) ─────────────────────────────────────────────────
 
 // ─── Progress bar animation ───────────────────────────────────────────────────
 document.querySelectorAll('.progress-fill').forEach(bar => {
