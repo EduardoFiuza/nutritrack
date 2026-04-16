@@ -73,59 +73,41 @@ def _run_manual_migrations():
 
 def _seed_foods():
     from models import Food
-    # Lista expandida com PESOS PADRÕES (Smart Defaults)
     foods = [
         # (nome, kcal/100g, prot/100g, categoria, unit_name, g_per_unit)
         ("Banana Prata", 89, 1.1, "Frutas", "Unidade", 85),
+        ("Banana", 89, 1.1, "Frutas", "Unidade", 85),
         ("Maçã Fugji", 52, 0.3, "Frutas", "Unidade", 130),
-        ("Laranja Pera", 47, 0.9, "Frutas", "Unidade", 150),
-        ("Morango", 32, 0.7, "Frutas", "Unidade", 12),
-        ("Manga Palmer", 60, 0.8, "Frutas", "Unidade", 350),
-        ("Abacaxi", 48, 0.5, "Frutas", "Fatia", 80),
-        
-        ("Arroz Branco Cozido", 130, 2.7, "Cereais", "Colher (sopa)", 25),
-        ("Feijão Carioca Cozido", 76, 4.8, "Cereais", "Colher (sopa)", 25),
-        ("Aveia em Flocos", 389, 17.0, "Cereais", "Colher (sopa)", 15),
-        ("Pão Francês", 300, 9.4, "Cereais", "Unidade", 50),
-        ("Pão Integral", 247, 9.7, "Cereais", "Fatia", 25),
-        ("Pão de Queijo", 250, 5.0, "Cereais", "Unidade", 20),
-        
-        ("Frango Peito Grelhado", 165, 31.0, "Carnes", "Filé Médio", 100),
+        ("Maçã", 52, 0.3, "Frutas", "Unidade", 130),
+        ("Ovo Cozido", 155, 13.0, "Carnes", "Unidade", 50),
         ("Ovo de Galinha Cozido", 155, 13.0, "Carnes", "Unidade", 50),
         ("Ovo Frito", 196, 13.6, "Carnes", "Unidade", 50),
-        ("Peito de Peru Defumado", 107, 24.0, "Carnes", "Fatia", 15),
-        
-        ("Leite Integral", 61, 3.2, "Laticínios", "Copo", 200),
+        ("Pão Francês", 300, 9.4, "Cereais", "Unidade", 50),
+        ("Pão Integral", 247, 9.7, "Cereais", "Fatia", 25),
         ("Requeijão Cremoso", 257, 9.3, "Laticínios", "Colher (sopa)", 20),
         ("Requeijão Light", 170, 12.0, "Laticínios", "Colher (sopa)", 20),
-        ("Queijo Mussarela", 300, 22.2, "Laticínios", "Fatia", 15),
-        ("Queijo Minas Frescal", 264, 17.4, "Laticínios", "Fatia", 30),
-        ("Iogurte Grego", 97, 9.0, "Laticínios", "Pote", 100),
-        ("Manteiga", 717, 0.8, "Laticínios", "Ponta de Faca", 5),
-        
-        ("Azeite de Oliva Extra Virgem", 884, 0.0, "Gorduras", "Colher (sopa)", 13),
-        ("Mel de Abelha", 304, 0.3, "Outros", "Colher (sopa)", 15),
-        ("Açúcar Branco", 387, 0.0, "Outros", "Colher (chá)", 5),
+        ("Arroz Branco Cozido", 130, 2.7, "Cereais", "Colher (sopa)", 25),
+        ("Feijão Carioca Cozido", 76, 4.8, "Cereais", "Colher (sopa)", 25),
+        ("Feijão Cozido", 76, 4.8, "Cereais", "Colher (sopa)", 25),
+        ("Azeite de Oliva", 884, 0.0, "Gorduras", "Colher (sopa)", 13),
+        ("Mel", 304, 0.3, "Outros", "Colher (sopa)", 15),
     ]
     
     for item in foods:
         name, kcal, prot, cat = item[0], item[1], item[2], item[3]
-        unit = item[4] if len(item) > 4 else None
-        grams = item[5] if len(item) > 5 else None
+        unit = item[4]
+        grams = item[5]
         
+        # Procura tanto pelo nome exato quanto por versões globais (user_id=None)
         food = Food.query.filter_by(name=name, user_id=None).first()
         if not food:
-            food = Food(name=name, kcal_per_100g=kcal,
-                        protein_per_100g=prot, category=cat,
-                        unit_name=unit, g_per_unit=grams,
-                        user_id=None)
+            food = Food(name=name, kcal_per_100g=kcal, protein_per_100g=prot, 
+                        category=cat, unit_name=unit, g_per_unit=grams, user_id=None)
             db.session.add(food)
         else:
-            # Sincroniza pesos/unidades se estiverem vazios
-            if unit and not food.unit_name:
-                food.unit_name = unit
-            if grams and not food.g_per_unit:
-                food.g_per_unit = grams
+            # FORÇA a atualização se estiver vazio
+            if not food.unit_name: food.unit_name = unit
+            if not food.g_per_unit: food.g_per_unit = grams
                 
     db.session.commit()
 
