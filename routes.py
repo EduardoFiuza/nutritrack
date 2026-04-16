@@ -150,19 +150,36 @@ def delete_food(food_id):
 @main_bp.route("/foods/edit/<int:food_id>", methods=["POST"])
 @login_required
 def edit_food(food_id):
-    food = Food.query.filter_by(id=food_id, user_id=current_user.id).first_or_404()
-    food.name = request.form["name"].strip()
-    food.kcal_per_100g = float(request.form["kcal"].replace(",", "."))
-    food.protein_per_100g = float(request.form["protein"].replace(",", "."))
-    food.category = request.form.get("category", "Outros")
+    # Busca o alimento original
+    food = Food.query.filter(
+        Food.id == food_id,
+        or_(Food.user_id == current_user.id, Food.user_id == None)
+    ).first_or_404()
+
+    # Se for global (None), criamos uma CÓPIA pessoal para não afetar os outros
+    # Se for do usuário, editamos o original.
+    is_global = (food.user_id is None)
+    
+    if is_global:
+        new_food = Food(user_id=current_user.id)
+        target = new_food
+        db.session.add(new_food)
+        flash(f"'{food.name}' personalizado e salvo na sua lista! ✨", "success")
+    else:
+        target = food
+        flash("Alimento atualizado! ✅", "success")
+
+    target.name = request.form["name"].strip()
+    target.kcal_per_100g = float(request.form["kcal"].replace(",", "."))
+    target.protein_per_100g = float(request.form["protein"].replace(",", "."))
+    target.category = request.form.get("category", "Outros")
     
     unit_name = request.form.get("unit_name", "").strip() or None
     g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
-    food.unit_name = unit_name
-    food.g_per_unit = float(g_per_unit) if g_per_unit else None
+    target.unit_name = unit_name
+    target.g_per_unit = float(g_per_unit) if g_per_unit else None
     
     db.session.commit()
-    flash("Alimento atualizado! ✅", "success")
     return redirect(url_for("main.foods"))
 
 

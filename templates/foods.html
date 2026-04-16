@@ -59,16 +59,17 @@
               {% endif %}
             </td>
             <td style="text-align:center;">
-              {% if food.user_id == current_user.id %}
               <button class="btn btn-secondary btn-sm btn-icon"
                       onclick="openEdit({{ food.id }}, '{{ food.name }}', {{ food.kcal_per_100g }}, {{ food.protein_per_100g }}, '{{ food.category }}', '{{ food.unit_name or '' }}', '{{ food.g_per_unit or '' }}')"
-                      title="Editar">✏️</button>
+                      title="{% if food.user_id %}Editar{% else %}Personalizar{% endif %}">
+                {% if food.user_id %}✏️{% else %}✨{% endif %}
+              </button>
+              
+              {% if food.user_id == current_user.id %}
               <form method="POST" action="{{ url_for('main.delete_food', food_id=food.id) }}"
                     style="display:inline;" onsubmit="return confirm('Excluir {{ food.name }}?')">
                 <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir">🗑️</button>
               </form>
-              {% else %}
-              <span style="font-size:.75rem;color:var(--dim);">—</span>
               {% endif %}
             </td>
           </tr>
