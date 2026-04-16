@@ -73,73 +73,108 @@ def _run_manual_migrations():
 
 def _seed_foods():
     from models import Food
-    if Food.query.filter_by(user_id=None).count() == 0:
-        foods = [
-            # (nome, kcal/100g, prot/100g, categoria)
-            ("Banana", 89, 1.1, "Frutas"),
-            ("Maçã", 52, 0.3, "Frutas"),
-            ("Laranja", 47, 0.9, "Frutas"),
-            ("Morango", 32, 0.7, "Frutas"),
-            ("Manga", 60, 0.8, "Frutas"),
-            ("Abacate", 160, 2.0, "Frutas"),
-            ("Melancia", 30, 0.6, "Frutas"),
-            ("Mamão", 43, 0.5, "Frutas"),
-            ("Uva", 69, 0.7, "Frutas"),
-            ("Pera", 57, 0.4, "Frutas"),
-            ("Arroz Branco Cozido", 130, 2.7, "Cereais"),
-            ("Arroz Integral Cozido", 111, 2.6, "Cereais"),
-            ("Feijão Cozido", 77, 4.8, "Cereais"),
-            ("Lentilha Cozida", 116, 9.0, "Cereais"),
-            ("Grão de Bico Cozido", 164, 8.9, "Cereais"),
-            ("Aveia", 389, 17.0, "Cereais"),
-            ("Massa Cozida", 131, 5.0, "Cereais"),
-            ("Pão Francês", 300, 9.4, "Cereais"),
-            ("Pão Integral", 247, 9.7, "Cereais"),
-            ("Milho Cozido", 86, 3.2, "Cereais"),
-            ("Frango Peito Grelhado", 165, 31.0, "Carnes"),
-            ("Carne Bovina Patinho", 219, 20.0, "Carnes"),
-            ("Ovo Cozido", 155, 13.0, "Carnes"),
-            ("Atum em Lata", 116, 25.5, "Carnes"),
-            ("Salmão Grelhado", 208, 28.0, "Carnes"),
-            ("Tilápia Grelhada", 128, 26.0, "Carnes"),
-            ("Camarão Cozido", 99, 24.0, "Carnes"),
-            ("Carne Suína Lombo", 182, 27.0, "Carnes"),
-            ("Peru Peito", 157, 30.0, "Carnes"),
-            ("Leite Integral", 61, 3.2, "Laticínios"),
-            ("Leite Desnatado", 35, 3.6, "Laticínios"),
-            ("Iogurte Natural", 61, 3.5, "Laticínios"),
-            ("Iogurte Grego", 97, 9.0, "Laticínios"),
-            ("Queijo Minas", 264, 17.4, "Laticínios"),
-            ("Queijo Mussarela", 300, 22.2, "Laticínios"),
-            ("Queijo Cottage", 98, 11.1, "Laticínios"),
-            ("Whey Protein", 370, 75.0, "Laticínios"),
-            ("Alface", 14, 1.4, "Vegetais"),
-            ("Tomate", 18, 0.9, "Vegetais"),
-            ("Cenoura", 41, 0.9, "Vegetais"),
-            ("Brócolis", 34, 2.8, "Vegetais"),
-            ("Espinafre", 23, 2.9, "Vegetais"),
-            ("Batata Inglesa Cozida", 77, 2.0, "Vegetais"),
-            ("Batata Doce Cozida", 86, 1.6, "Vegetais"),
-            ("Cebola", 40, 1.1, "Vegetais"),
-            ("Abobrinha", 17, 1.2, "Vegetais"),
-            ("Beterraba Cozida", 44, 1.7, "Vegetais"),
-            ("Pepino", 15, 0.7, "Vegetais"),
-            ("Couve", 28, 3.0, "Vegetais"),
-            ("Azeite de Oliva", 884, 0.0, "Gorduras"),
-            ("Amendoim", 567, 25.8, "Gorduras"),
-            ("Castanha do Pará", 659, 14.3, "Gorduras"),
-            ("Amêndoa", 579, 21.2, "Gorduras"),
-            ("Pasta de Amendoim", 588, 25.1, "Gorduras"),
-            ("Mel", 304, 0.3, "Outros"),
-            ("Açúcar", 387, 0.0, "Outros"),
-            ("Chocolate 70%", 598, 7.8, "Outros"),
-            ("Tapioca", 345, 0.2, "Outros"),
-            ("Granola", 471, 10.4, "Outros"),
-        ]
-        for name, kcal, prot, cat in foods:
+    # Lista expandida de alimentos brasileiros e globais
+    foods = [
+        # Frutas
+        ("Banana Prata", 89, 1.1, "Frutas"),
+        ("Maçã Fugji", 52, 0.3, "Frutas"),
+        ("Laranja Pera", 47, 0.9, "Frutas"),
+        ("Morango", 32, 0.7, "Frutas"),
+        ("Manga Palmer", 60, 0.8, "Frutas"),
+        ("Abacate", 160, 2.0, "Frutas"),
+        ("Melancia", 30, 0.6, "Frutas"),
+        ("Mamão Papaia", 43, 0.5, "Frutas"),
+        ("Uva Thompson", 69, 0.7, "Frutas"),
+        ("Abacaxi", 48, 0.5, "Frutas"),
+        ("Limão", 29, 1.1, "Frutas"),
+        ("Pera", 57, 0.4, "Frutas"),
+        ("Melão", 34, 0.8, "Frutas"),
+        
+        # Cereais e Grãos
+        ("Arroz Branco Cozido", 130, 2.7, "Cereais"),
+        ("Arroz Integral Cozido", 111, 2.6, "Cereais"),
+        ("Feijão Carioca Cozido", 76, 4.8, "Cereais"),
+        ("Feijão Preto Cozido", 77, 4.5, "Cereais"),
+        ("Lentilha Cozida", 116, 9.0, "Cereais"),
+        ("Grão de Bico Cozido", 164, 8.9, "Cereais"),
+        ("Aveia em Flocos", 389, 17.0, "Cereais"),
+        ("Massa (Macarrão) Cozida", 131, 5.0, "Cereais"),
+        ("Cuscuz Nordestino", 112, 2.3, "Cereais"),
+        ("Tapioca (Goma)", 240, 0.0, "Cereais"),
+        ("Pão Francês", 300, 9.4, "Cereais"),
+        ("Pão Integral", 247, 9.7, "Cereais"),
+        ("Pão de Queijo", 250, 5.0, "Cereais"),
+        ("Milho Verde Cozido", 108, 3.2, "Cereais"),
+        ("Pipoca (sem óleo)", 375, 11.0, "Cereais"),
+        
+        # Carnes e Proteínas
+        ("Frango Peito Grelhado", 165, 31.0, "Carnes"),
+        ("Frango Sobrecoxa Assada", 232, 25.0, "Carnes"),
+        ("Carne Bovina Patinho Grelhado", 219, 35.0, "Carnes"),
+        ("Carne Bovina Alcatra", 241, 31.0, "Carnes"),
+        ("Ovo de Galinha Cozido", 155, 13.0, "Carnes"),
+        ("Ovo Frito", 196, 13.6, "Carnes"),
+        ("Ovo Mexido", 166, 10.0, "Carnes"),
+        ("Atum ao Natural", 116, 25.5, "Carnes"),
+        ("Salmão Grelhado", 208, 28.0, "Carnes"),
+        ("Tilápia Grelhada", 128, 26.0, "Carnes"),
+        ("Presunto Cozido", 145, 16.5, "Carnes"),
+        ("Peito de Peru Defumado", 107, 24.0, "Carnes"),
+        ("Patinho Moído", 212, 26.0, "Carnes"),
+        ("Coxão Mole", 219, 28.0, "Carnes"),
+        
+        # Laticínios
+        ("Leite Desnatado", 35, 3.6, "Laticínios"),
+        ("Leite Semidesnatado", 45, 3.4, "Laticínios"),
+        ("Leite Integral", 61, 3.2, "Laticínios"),
+        ("Requeijão Cremoso", 257, 9.3, "Laticínios"),
+        ("Requeijão Light", 170, 12.0, "Laticínios"),
+        ("Queijo Mussarela", 300, 22.2, "Laticínios"),
+        ("Queijo Minas Frescal", 264, 17.4, "Laticínios"),
+        ("Queijo Prato", 350, 25.0, "Laticínios"),
+        ("Queijo Cottage", 98, 11.1, "Laticínios"),
+        ("Iogurte Natural Integral", 61, 3.5, "Laticínios"),
+        ("Iogurte Grego", 97, 9.0, "Laticínios"),
+        ("Whey Protein Concentrado", 400, 80.0, "Laticínios"),
+        ("Manteiga", 717, 0.8, "Laticínios"),
+        
+        # Vegetais
+        ("Alface Crespa", 15, 1.3, "Vegetais"),
+        ("Tomate Cereja", 18, 0.9, "Vegetais"),
+        ("Cenoura Crua", 41, 0.9, "Vegetais"),
+        ("Brócolis Cozido", 34, 2.8, "Vegetais"),
+        ("Abóbora Cabotiá Cozida", 48, 1.0, "Vegetais"),
+        ("Batata Inglesa Cozida", 77, 2.0, "Vegetais"),
+        ("Batata Doce Cozida", 86, 1.6, "Vegetais"),
+        ("Beterraba Crua", 43, 1.6, "Vegetais"),
+        ("Abobrinha Refogada", 25, 1.1, "Vegetais"),
+        ("Chuchu Cozido", 19, 0.4, "Vegetais"),
+        ("Espinafre Cozido", 23, 2.9, "Vegetais"),
+        ("Cebola", 40, 1.1, "Vegetais"),
+        
+        # Outros / Gorduras
+        ("Azeite de Oliva Extra Virgem", 884, 0.0, "Gorduras"),
+        ("Manteiga com Sal", 717, 0.8, "Gorduras"),
+        ("Margarina", 717, 0.5, "Gorduras"),
+        ("Pasta de Amendoim Integral", 588, 25.1, "Gorduras"),
+        ("Castanha de Caju", 553, 18.2, "Gorduras"),
+        ("Nozes", 654, 15.0, "Gorduras"),
+        ("Mel de Abelha", 304, 0.3, "Outros"),
+        ("Granola Tradicional", 471, 10.4, "Outros"),
+        ("Chocolate Meio Amargo", 546, 4.9, "Outros"),
+        ("Açúcar Branco", 387, 0.0, "Outros"),
+        ("Maionese Tradicional", 680, 1.0, "Outros"),
+        ("Catchup", 112, 1.2, "Outros"),
+        ("Mostarda", 66, 4.4, "Outros"),
+    ]
+    
+    # Repopulamos apenas o que falta (evita duplicatas)
+    for name, kcal, prot, cat in foods:
+        exists = Food.query.filter_by(name=name, user_id=None).first()
+        if not exists:
             db.session.add(Food(name=name, kcal_per_100g=kcal,
                                 protein_per_100g=prot, category=cat, user_id=None))
-        db.session.commit()
+    db.session.commit()
 
 
 app = create_app()
