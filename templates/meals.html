@@ -72,11 +72,11 @@
     </div>
 
     <!-- ── COLUNA DIREITA: Resumo do dia ──────────────────────── -->
-    <div>
+    <div id="right-column">
       <!-- Seletor de data -->
-      <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;">
-        <input type="date" name="date" class="form-control" value="{{ selected_date }}" />
-        <button type="submit" class="btn btn-secondary">Ver dia</button>
+      <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;" id="date-select-form">
+        <input type="date" name="date" class="form-control" value="{{ selected_date }}" onchange="document.getElementById('date-select-form').submit();" />
+        <button type="submit" class="btn btn-secondary" style="display:none;">Ver dia</button>
       </form>
 
       <!-- Totais do dia -->
@@ -148,5 +148,63 @@
       {% endif %}
     </div>
   </div>
+    </div>
+  </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const addForm = document.getElementById("add-form");
+  if (addForm) {
+    addForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = addForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = "⏳ Adicionando...";
+      submitBtn.disabled = true;
+
+      const formData = new FormData(addForm);
+      const selectedDate = formData.get("date");
+
+      try {
+        // Envia o form
+        const response = await fetch(addForm.action, {
+          method: "POST",
+          body: formData
+        });
+        
+        // Se deu sucesso, o Flask redireciona de volta para a tela de meals.
+        // O fetch já segue esse redirect e nos devolve o HTML da página já atualizada.
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        // 1. Atualizar a coluna da direita com os novos dados
+        const newRightCol = doc.getElementById("right-column");
+        if (newRightCol) {
+          document.getElementById("right-column").innerHTML = newRightCol.innerHTML;
+        }
+
+        // 2. Limpar os inputs de busca
+        document.getElementById("food-search").value = "";
+        document.getElementById("food_id").value = "";
+        document.getElementById("portion-result").innerHTML = "";
+
+        // 3. Atualizar a URL no navegador sem recarregar a tela
+        window.history.pushState(null, "", "/meals?date=" + selectedDate);
+        
+        // 4. Mostrar feedback rápido
+        submitBtn.innerHTML = "✅ Feito!";
+        setTimeout(() => { submitBtn.innerHTML = originalText; submitBtn.disabled = false; }, 1500);
+
+      } catch (err) {
+        console.error("Erro ao adicionar:", err);
+        submitBtn.innerHTML = "❌ Erro";
+        setTimeout(() => { submitBtn.innerHTML = originalText; submitBtn.disabled = false; }, 1500);
+      }
+    });
+  }
+});
+</script>
 {% endblock %}
