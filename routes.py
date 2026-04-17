@@ -22,9 +22,15 @@ def dashboard():
     summary = _build_day_summary(day)
     total_kcal = sum(m["total_kcal"] for m in summary.values())
     total_prot = sum(m["total_prot"] for m in summary.values())
+    total_carb = sum(m["total_carb"] for m in summary.values())
+    total_fat = sum(m["total_fat"] for m in summary.values())
 
     goal_kcal = current_user.goal_kcal or 2000
     goal_prot = current_user.protein_goal or 100
+    # Metas padrão simplificadas para Carb e Gord caso não existam no perfil
+    goal_carb = goal_kcal * 0.5 / 4  # 50% kcal
+    goal_fat = goal_kcal * 0.3 / 9   # 30% kcal
+
     pct_kcal = min(int((total_kcal / goal_kcal) * 100), 100) if goal_kcal else 0
     pct_prot = min(int((total_prot / goal_prot) * 100), 100) if goal_prot else 0
 
@@ -35,11 +41,16 @@ def dashboard():
         meal_types=MEAL_TYPES,
         total_kcal=round(total_kcal, 1),
         total_prot=round(total_prot, 1),
+        total_carb=round(total_carb, 1),
+        total_fat=round(total_fat, 1),
         goal_kcal=goal_kcal,
         goal_prot=goal_prot,
+        goal_carb=round(goal_carb, 1),
+        goal_fat=round(goal_fat, 1),
         pct_kcal=pct_kcal,
         pct_prot=pct_prot,
     )
+
 
 
 # ─── BMR ──────────────────────────────────────────────────────────────────────
@@ -119,6 +130,8 @@ def add_food():
         name = request.form["name"].strip()
         kcal = float(request.form["kcal"].replace(",", "."))
         protein = float(request.form["protein"].replace(",", "."))
+        carbs = float(request.form.get("carbs", "0").replace(",", "."))
+        fat = float(request.form.get("fat", "0").replace(",", "."))
         category = request.form.get("category", "Outros")
         unit_name = request.form.get("unit_name", "").strip() or None
         g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
@@ -128,13 +141,17 @@ def add_food():
         return redirect(url_for("main.foods"))
 
     food = Food(name=name, kcal_per_100g=kcal,
-                protein_per_100g=protein, category=category,
+                protein_per_100g=protein, 
+                carbs_per_100g=carbs,
+                fat_per_100g=fat,
+                category=category,
                 unit_name=unit_name, g_per_unit=g_per_unit,
                 user_id=current_user.id)
     db.session.add(food)
     db.session.commit()
     flash(f"'{name}' adicionado com sucesso! ✅", "success")
     return redirect(url_for("main.foods"))
+
 
 
 @main_bp.route("/foods/delete/<int:food_id>", methods=["POST"])
@@ -194,11 +211,14 @@ def meals():
     summary = _build_day_summary(day)
     total_kcal = round(sum(m["total_kcal"] for m in summary.values()), 1)
     total_prot = round(sum(m["total_prot"] for m in summary.values()), 1)
+    total_carb = round(sum(m["total_carb"] for m in summary.values()), 1)
+    total_fat = round(sum(m["total_fat"] for m in summary.values()), 1)
 
     all_foods = Food.query.filter(
         or_(Food.user_id == current_user.id, Food.user_id == None)
     ).order_by(Food.name).all()
 
+    goal_kcal = current_user.goal_kcal or 2000
     return render_template(
         "meals.html",
         selected_date=selected_date,
@@ -207,9 +227,14 @@ def meals():
         foods=all_foods,
         total_kcal=total_kcal,
         total_prot=total_prot,
-        goal_kcal=current_user.goal_kcal or 2000,
+        total_carb=total_carb,
+        total_fat=total_fat,
+        goal_kcal=goal_kcal,
         goal_prot=current_user.protein_goal or 100,
+        goal_carb=round(goal_kcal * 0.5 / 4, 1),
+        goal_fat=round(goal_kcal * 0.3 / 9, 1),
     )
+
 
 
 @main_bp.route("/meals/add", methods=["POST"])
@@ -246,9 +271,13 @@ def add_meal_item():
     db.session.add(item)
     db.session.commit()
 
-    kcal, prot = calc_nutrients(food.kcal_per_100g, food.protein_per_100g, quantity_g)
-    flash(f"✅ {quantity_g}g de {food.name} adicionado → {kcal} kcal | {prot}g prot.", "success")
+    kcal, prot, carb, fat = calc_nutrients(
+        food.kcal_per_100g, food.protein_per_100g, 
+        food.carbs_per_100g, food.fat_per_100g, quantity_g
+    )
+    flash(f"✅ {quantity_g}g de {food.name} adicionado!", "success")
     return redirect(url_for("main.meals", date=selected_date))
+
 
 
 @main_bp.route("/meals/delete/<int:item_id>", methods=["POST"])
@@ -277,11 +306,14 @@ def api_calc():
     try:
         kcal100 = float(request.args["kcal100"])
         prot100 = float(request.args["prot100"])
+        carb100 = float(request.args.get("carb100", 0))
+        fat100 = float(request.args.get("fat100", 0))
         qty = float(request.args.get("qty", 100))
     except (ValueError, KeyError):
         return jsonify({"error": "invalid"}), 400
-    kcal, prot = calc_nutrients(kcal100, prot100, qty)
-    return jsonify({"kcal": kcal, "prot": prot})
+    kcal, prot, carb, fat = calc_nutrients(kcal100, prot100, carb100, fat100, qty)
+    return jsonify({"kcal": kcal, "prot": prot, "carb": carb, "fat": fat})
+
 
 
 @main_bp.route("/api/foods")
@@ -295,10 +327,12 @@ def api_foods():
     return jsonify([{
         "id": f.id, "name": f.name,
         "kcal": f.kcal_per_100g, "prot": f.protein_per_100g,
+        "carb": f.carbs_per_100g, "fat": f.fat_per_100g,
         "category": f.category,
         "unit_name": f.unit_name,
         "g_per_unit": f.g_per_unit
     } for f in foods])
+
 
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
@@ -311,22 +345,33 @@ def _build_day_summary(day):
         items_data = []
         meal_kcal = 0.0
         meal_prot = 0.0
+        meal_carb = 0.0
+        meal_fat = 0.0
         for item in meal.items:
-            kcal, prot = calc_nutrients(
-                item.food.kcal_per_100g, item.food.protein_per_100g, item.quantity_g
+            kcal, prot, carb, fat = calc_nutrients(
+                item.food.kcal_per_100g, item.food.protein_per_100g,
+                item.food.carbs_per_100g, item.food.fat_per_100g,
+                item.quantity_g
             )
             meal_kcal += kcal
             meal_prot += prot
+            meal_carb += carb
+            meal_fat += fat
             items_data.append({
                 "id": item.id,
                 "name": item.food.name,
                 "quantity_g": item.quantity_g,
                 "kcal": kcal,
                 "prot": prot,
+                "carb": carb,
+                "fat": fat,
             })
         summary[meal.meal_type] = {
             "items": items_data,
             "total_kcal": round(meal_kcal, 1),
             "total_prot": round(meal_prot, 1),
+            "total_carb": round(meal_carb, 1),
+            "total_fat": round(meal_fat, 1),
         }
+
     return summary

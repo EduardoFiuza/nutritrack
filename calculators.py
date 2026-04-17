@@ -69,9 +69,15 @@ def get_full_analysis(weight_kg, height_cm, age, sex, activity_label, goal_label
     }
 
 
-def calc_nutrients(kcal_per_100g, protein_per_100g, quantity_g):
-    f = quantity_g / 100.0
-    return round(kcal_per_100g * f, 1), round(protein_per_100g * f, 1)
+def calc_nutrients(kcal100, prot100, carb100, fat100, qty):
+    f = qty / 100.0
+    return (
+        round(kcal100 * f, 1),
+        round(prot100 * f, 1),
+        round(carb100 * f, 1),
+        round(fat100 * f, 1)
+    )
+
 
 
 def calc_grams_for_kcal(kcal_per_100g, target_kcal):
