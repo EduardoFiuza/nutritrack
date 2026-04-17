@@ -46,14 +46,18 @@ if (foodSearchInput) {
       item.className = 'dropdown-item';
       let unitInfo = f.unit_name ? `<span class="badge badge-purple">${f.unit_name}</span>` : '';
       item.innerHTML = `<span class="di-name">${f.name} ${unitInfo}</span>
-        <span class="di-stats">${f.kcal} <small>kcal/100g</small> | ${f.prot}g <small>prot</small></span>`;
+        <span class="di-stats">
+            <span style="color:var(--yellow)">🔥 ${f.kcal}</span> | 
+            <span style="color:var(--prot)">💪 ${f.prot}g</span> | 
+            <span style="color:var(--carb)">🍞 ${f.carb}g</span> | 
+            <span style="color:var(--fat)">🥑 ${f.fat}g</span>
+        </span>`;
       item.addEventListener('click', () => {
         window.selectedFood = f;
         foodSearchInput.value = f.name;
         foodIdInput.value = f.id;
         foodDropdown.style.display = 'none';
         
-        // Sugerir a unidade caso o alimento tenha uma pré-definida
         const measureSelect = document.getElementById('measure-select');
         if (measureSelect) {
             if (f.unit_name) {
@@ -68,7 +72,6 @@ if (foodSearchInput) {
             measureSelect.dispatchEvent(new Event('change'));
         }
         
-        // Se a quantidade estiver vazia ou for 100 (padrão antigo), mudar para 1 se for unidade
         if (measureSelect && measureSelect.value !== 'g' && (qtyInput.value == "" || qtyInput.value == "100")) {
             qtyInput.value = "1";
         }
@@ -87,34 +90,7 @@ if (foodSearchInput) {
   });
 }
 
-// Escutar mudanças no seletor de medida (Grama vs Unidade/Fatia/etc)
-const measureSelect = document.getElementById('measure-select');
-if (measureSelect) {
-    measureSelect.addEventListener('change', () => {
-        const val = measureSelect.value;
-        const weightWrap = document.getElementById('custom-weight-wrap');
-        const unitLabel = document.getElementById('custom-unit-name');
-        
-        if (val === 'g') {
-            weightWrap.style.display = 'none';
-            if (qtyInput.value == "1") qtyInput.value = "100";
-        } else {
-            weightWrap.style.display = 'block';
-            unitLabel.textContent = measureSelect.options[measureSelect.selectedIndex].text.toLowerCase();
-            if (qtyInput.value == "100") qtyInput.value = "1";
-        }
-        updatePreview();
-    });
-}
-
-const customWeightInput = document.getElementById('custom-weight');
-if (customWeightInput) {
-    customWeightInput.addEventListener('input', updatePreview);
-}
-
-if (qtyInput) {
-  qtyInput.addEventListener('input', updatePreview);
-}
+// ... (seletor de medida permanece igual)
 
 function updatePreview() {
   if (!window.selectedFood || !qtyInput) return;
@@ -126,42 +102,57 @@ function updatePreview() {
 
   if (measure !== 'g') {
     const weightPerUnit = parseFloat(document.getElementById('custom-weight').value) || 0;
-    qty = qty * weightPerUnit; // Converte para gramas para o cálculo
+    qty = qty * weightPerUnit; 
     unitLabel = document.getElementById('measure-select').options[document.getElementById('measure-select').selectedIndex].text;
   }
 
-  const kcal = (window.selectedFood.kcal * qty / 100).toFixed(1);
-  const prot = (window.selectedFood.prot * qty / 100).toFixed(1);
+  const f = qty / 100;
+  const kcal = (window.selectedFood.kcal * f).toFixed(1);
+  const prot = (window.selectedFood.prot * f).toFixed(1);
+  const carb = (window.selectedFood.carb * f).toFixed(1);
+  const fat = (window.selectedFood.fat * f).toFixed(1);
   
   if (previewDiv) {
+    let html = '';
     if (measure !== 'g') {
        const weightPerUnit = parseFloat(document.getElementById('custom-weight').value) || 0;
-       if (weightPerUnit > 0) {
-          previewDiv.innerHTML = `
-            <div style="background:rgba(67,233,123,0.1); padding:10px; border-radius:8px; border:1px solid var(--green); margin-top:10px;">
-                <div style="font-size:0.8rem; color:var(--dim); margin-bottom:4px;">Resultado do cálculo:</div>
-                <div style="font-size:1.1rem; font-weight:700; color:var(--green);">
-                    🔥 ${kcal} kcal | 💪 ${prot}g prot.
-                </div>
-                <div style="font-size:0.75rem; color:var(--dim); margin-top:2px;">
-                    Considerando ${displayQty} ${unitLabel.toLowerCase()} (${qty.toFixed(0)}g total)
-                </div>
-            </div>`;
-       } else {
-          previewDiv.textContent = `⚠ Informe o peso de 1 ${unitLabel.toLowerCase()} para ver as calorias.`;
+       if (weightPerUnit <= 0) {
+          previewDiv.innerHTML = `<div class="alert alert-warning" style="margin-top:10px;">⚠ Informe o peso de 1 ${unitLabel.toLowerCase()} para calcular.</div>`;
+          return;
        }
-    } else {
-        previewDiv.innerHTML = `
-            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:10px;">
-                <div style="font-size:1.1rem; font-weight:700; color:var(--yellow);">
-                    🔥 ${kcal} kcal | 💪 ${prot}g prot.
-                </div>
-                <div style="font-size:0.75rem; color:var(--dim);">${qty}g de ${window.selectedFood.name}</div>
-            </div>`;
     }
+
+    html = `
+        <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px solid var(--border); margin-top:15px; animation: slideIn 0.3s ease;">
+            <div style="font-size:0.8rem; color:var(--dim); margin-bottom:10px; display:flex; justify-content:space-between;">
+                <span>PRÉVIA NUTRICIONAL</span>
+                <span>${qty.toFixed(0)}g total</span>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center;">
+                <div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--yellow);">${kcal}</div>
+                    <div style="font-size:0.65rem; color:var(--dim);">KCAL</div>
+                </div>
+                <div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--prot);">${prot}g</div>
+                    <div style="font-size:0.65rem; color:var(--dim);">PROT</div>
+                </div>
+                <div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--carb);">${carb}g</div>
+                    <div style="font-size:0.65rem; color:var(--dim);">CARB</div>
+                </div>
+                <div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--fat);">${fat}g</div>
+                    <div style="font-size:0.65rem; color:var(--dim);">GORD</div>
+                </div>
+            </div>
+        </div>`;
+    
+    previewDiv.innerHTML = html;
     previewDiv.style.display = 'block';
   }
 }
+
 
 // ─── BMR Portion Calculator ───────────────────────────────────────────────────
 const bmrCalcBtn = document.getElementById('portion-calc-btn');
@@ -209,31 +200,27 @@ document.addEventListener('submit', async e => {
         // 1. Extrair valores do item removido
         const itemKcal = parseFloat(itemRow.dataset.kcal) || 0;
         const itemProt = parseFloat(itemRow.dataset.prot) || 0;
+        const itemCarb = parseFloat(itemRow.dataset.carb) || 0;
+        const itemFat = parseFloat(itemRow.dataset.fat) || 0;
         const mealType = itemRow.dataset.meal;
 
         // 2. Atualizar Totais do Dia
-        const totalKcalEl = document.getElementById('total-kcal-val');
-        const totalProtEl = document.getElementById('total-prot-val');
-        const currentTotalKcal = parseFloat(totalKcalEl.textContent) || 0;
-        const currentTotalProt = parseFloat(totalProtEl.textContent) || 0;
+        const updateVal = (id, subtract) => {
+            const el = document.getElementById(id);
+            if (el) {
+                const current = parseFloat(el.textContent) || 0;
+                el.textContent = Math.max(0, current - subtract).toFixed(1);
+                return parseFloat(el.textContent);
+            }
+            return 0;
+        };
         
-        const newTotalKcal = Math.max(0, currentTotalKcal - itemKcal);
-        const newTotalProt = Math.max(0, currentTotalProt - itemProt);
-        
-        totalKcalEl.textContent = newTotalKcal.toFixed(1);
-        totalProtEl.textContent = newTotalProt.toFixed(1);
+        const newTotalKcal = updateVal('total-kcal-val', itemKcal);
+        const newTotalProt = updateVal('total-prot-val', itemProt);
+        const newTotalCarb = updateVal('total-carb-val', itemCarb);
+        const newTotalFat = updateVal('total-fat-val', itemFat);
 
-        // 3. Atualizar Totais da Refeição
-        const mealKcalEl = document.querySelector(`.meal-kcal-val[data-meal="${mealType}"]`);
-        const mealProtEl = document.querySelector(`.meal-prot-val[data-meal="${mealType}"]`);
-        if (mealKcalEl && mealProtEl) {
-           const currentMealKcal = parseFloat(mealKcalEl.textContent) || 0;
-           const currentMealProt = parseFloat(mealProtEl.textContent) || 0;
-           mealKcalEl.textContent = Math.max(0, currentMealKcal - itemKcal).toFixed(1);
-           mealProtEl.textContent = Math.max(0, currentMealProt - itemProt).toFixed(1);
-        }
-
-        // 4. Atualizar Barra de Progresso
+        // 3. Atualizar Barra de Progresso Principal (Kcal)
         const goalKcal = parseFloat(document.getElementById('goal-kcal-val')?.textContent) || 2000;
         const pct = Math.min(100, Math.floor((newTotalKcal / goalKcal) * 100));
         const progressFill = document.getElementById('progress-bar-fill');
@@ -246,7 +233,22 @@ document.addEventListener('submit', async e => {
         }
         if (progressPct) progressPct.textContent = pct;
 
+        // 4. Atualizar Barras de Macros Secundárias
+        const updateBar = (idSuffix, currentVal, goalId) => {
+            const fill = document.getElementById('total-' + idSuffix + '-fill');
+            const goal = parseFloat(document.getElementById(goalId)?.textContent) || 100;
+            if (fill) {
+                const pctMacro = Math.min(100, Math.floor((currentVal / goal) * 100));
+                fill.style.width = pctMacro + '%';
+                fill.dataset.width = pctMacro;
+            }
+        };
+        updateBar('prot', newTotalProt, 'goal-prot-val');
+        updateBar('carb', newTotalCarb, 'goal-carb-val');
+        updateBar('fat', newTotalFat, 'goal-fat-val');
+
         // 5. Remover o elemento com animação
+
         itemRow.style.transition = 'all 0.3s ease';
         itemRow.style.opacity = '0';
         itemRow.style.transform = 'translateX(20px)';

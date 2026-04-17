@@ -89,25 +89,59 @@
       </form>
 
       <!-- Totais do dia -->
-      <div class="card" style="margin-bottom:16px;background:var(--card2);">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;">
+      <div class="card" style="margin-bottom:16px;background:var(--card2); position:relative; overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:flex-start;">
           <div>
-            <div style="font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;">Total do dia</div>
-            <div style="font-size:1.6rem;font-weight:800;color:var(--yellow);">🔥 <span id="total-kcal-val">{{ total_kcal }}</span> <span style="font-size:.9rem;font-weight:400;color:var(--dim);">kcal</span></div>
-            <div style="font-size:1.1rem;font-weight:700;color:var(--green);">💪 <span id="total-prot-val">{{ total_prot }}</span>g <span style="font-size:.85rem;font-weight:400;color:var(--dim);">proteína</span></div>
+            <div style="font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">🔥 Energia Total</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--yellow);line-height:1.1;"><span id="total-kcal-val">{{ total_kcal }}</span> <span style="font-size:.9rem;font-weight:400;color:var(--dim);">kcal</span></div>
+            <div style="font-size:.85rem;color:var(--dim);margin-top:4px;">Meta: <span id="goal-kcal-val">{{ goal_kcal }}</span> kcal</div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:.75rem;color:var(--dim);">Meta diária</div>
-            <div style="color:var(--dim);"><span id="goal-kcal-val">{{ goal_kcal }}</span> kcal | {{ goal_prot }}g prot.</div>
-            {% set pct = [(total_kcal / goal_kcal * 100)|int, 100]|min if goal_kcal else 0 %}
-            <div class="progress-bar" style="width:140px;margin-top:8px;">
-              <div id="progress-bar-fill" class="progress-fill {% if pct >= 100 %}over{% endif %}"
-                   data-width="{{ pct }}" style="width:{{ pct }}%;"></div>
+          <div style="flex:1; max-width:200px;">
+            {% set pct_kcal = [(total_kcal / goal_kcal * 100)|int, 100]|min if goal_kcal else 0 %}
+            <div class="progress-bar" style="height:12px; margin-top:8px; background:rgba(0,0,0,0.2);">
+              <div id="progress-bar-fill" class="progress-fill {% if pct_kcal >= 100 %}over{% endif %}"
+                   data-width="{{ pct_kcal }}" style="width:{{ pct_kcal }}%;"></div>
             </div>
-            <div style="font-size:.75rem;color:var(--dim);margin-top:4px;"><span id="progress-percent">{{ pct }}</span>%</div>
+            <div style="text-align:right; font-size:.75rem; color:var(--dim); margin-top:4px;"><span id="progress-percent">{{ pct_kcal }}</span>% da meta</div>
           </div>
         </div>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.05);">
+            <!-- Proteína -->
+            <div>
+                <div style="font-size:0.7rem; color:var(--dim); text-transform:uppercase; margin-bottom:4px;">Proteína</div>
+                <div style="font-size:1.1rem; font-weight:700; color:var(--prot);"><span id="total-prot-val">{{ total_prot }}</span>g</div>
+                {% set pct_prot = [(total_prot / goal_prot * 100)|int, 100]|min if goal_prot else 0 %}
+                <div class="progress-bar" style="height:4px; margin-top:4px;">
+                    <div id="total-prot-fill" class="progress-fill" style="width:{{ pct_prot }}%; background:var(--prot);" data-width="{{ pct_prot }}"></div>
+                </div>
+            </div>
+            <!-- Carbo -->
+            <div>
+                <div style="font-size:0.7rem; color:var(--dim); text-transform:uppercase; margin-bottom:4px;">Carbo</div>
+                <div style="font-size:1.1rem; font-weight:700; color:var(--carb);"><span id="total-carb-val">{{ total_carb }}</span>g</div>
+                {% set pct_carb = [(total_carb / goal_carb * 100)|int, 100]|min if goal_carb else 0 %}
+                <div class="progress-bar" style="height:4px; margin-top:4px;">
+                    <div id="total-carb-fill" class="progress-fill" style="width:{{ pct_carb }}%; background:var(--carb);" data-width="{{ pct_carb }}"></div>
+                </div>
+            </div>
+            <!-- Gordura -->
+            <div>
+                <div style="font-size:0.7rem; color:var(--dim); text-transform:uppercase; margin-bottom:4px;">Gordura</div>
+                <div style="font-size:1.1rem; font-weight:700; color:var(--fat);"><span id="total-fat-val">{{ total_fat }}</span>g</div>
+                {% set pct_fat = [(total_fat / goal_fat * 100)|int, 100]|min if goal_fat else 0 %}
+                <div class="progress-bar" style="height:4px; margin-top:4px;">
+                    <div id="total-fat-fill" class="progress-fill" style="width:{{ pct_fat }}%; background:var(--fat);" data-width="{{ pct_fat }}"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Escondendo as metas para usar no JS -->
+        <span id="goal-prot-val" style="display:none;">{{ goal_prot }}</span>
+        <span id="goal-carb-val" style="display:none;">{{ goal_carb }}</span>
+        <span id="goal-fat-val" style="display:none;">{{ goal_fat }}</span>
       </div>
+
 
       <!-- Refeições -->
       {% set colors = ['#f9ca24','#6c63ff','#43e97b','#ff6584','#48dbfb','#a29bfe'] %}
@@ -134,8 +168,10 @@
                 <div class="meal-item-qty">{{ item.quantity_g }}g</div>
               </div>
               <div class="meal-item-stats">
-                <span style="color:var(--yellow);font-size:.82rem;">🔥 {{ item.kcal }}</span>
-                <span style="color:var(--green);font-size:.82rem;">💪 {{ item.prot }}g</span>
+                <span class="badge badge-yellow" title="Calorias">🔥 {{ item.kcal }}</span>
+                <span class="badge badge-green" title="Proteína">💪 {{ item.prot }}g</span>
+                <span class="badge badge-purple" title="Carboidratos" style="background:rgba(108,99,255,0.1);">🍞 {{ item.carb }}g</span>
+                <span class="badge badge-yellow" title="Gorduras" style="background:rgba(249,202,36,0.1);">🥑 {{ item.fat }}g</span>
                 <form method="POST" class="ajax-delete-form"
                       action="{{ url_for('main.delete_meal_item', item_id=item.id) }}"
                       style="margin:0;">
@@ -146,6 +182,7 @@
             {% endfor %}
           </div>
         </div>
+
         {% endif %}
       {% else %}
         <!-- Nenhum meal_type com dados -->
