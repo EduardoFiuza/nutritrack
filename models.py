@@ -39,7 +39,10 @@ class Food(db.Model):
     name = db.Column(db.String(150), nullable=False)
     kcal_per_100g = db.Column(db.Float, nullable=False)
     protein_per_100g = db.Column(db.Float, nullable=False)
+    carbs_per_100g = db.Column(db.Float, nullable=False, default=0.0)
+    fat_per_100g = db.Column(db.Float, nullable=False, default=0.0)
     category = db.Column(db.String(60), default="Outros")
+
     unit_name = db.Column(db.String(50), nullable=True)
     g_per_unit = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
