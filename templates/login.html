@@ -41,7 +41,14 @@
       </button>
     </form>
 
-    <p style="text-align:center;margin-top:20px;font-size:.88rem;color:var(--dim);">
+    <p style="text-align:center;margin-top:14px;font-size:.85rem;">
+      <a href="{{ url_for('auth.forgot_password') }}" style="color:var(--dim);transition:color .2s;"
+         onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--dim)'">
+        🔑 Esqueci minha senha
+      </a>
+    </p>
+
+    <p style="text-align:center;margin-top:14px;font-size:.88rem;color:var(--dim);">
       Não tem conta?
       <a href="{{ url_for('auth.register') }}" style="color:var(--accent);font-weight:600;">Criar conta grátis</a>
     </p>

@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from extensions import db, bcrypt
 from models import User
 
@@ -73,3 +74,71 @@ def logout():
     logout_user()
     flash("Você saiu da sua conta.", "info")
     return redirect(url_for("auth.login"))
+
+
+def _get_serializer():
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+
+
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            s = _get_serializer()
+            token = s.dumps(user.email, salt="password-reset")
+            reset_url = url_for("auth.reset_password", token=token, _external=True)
+            # Como não temos servidor de e-mail, mostramos o link na tela
+            flash(f"Link de redefinição gerado! Copie e acesse:", "info")
+            return render_template("forgot_password.html", reset_link=reset_url)
+        else:
+            # Mensagem genérica por segurança (não revela se e-mail existe)
+            flash("Se este e-mail estiver cadastrado, um link de redefinição será exibido.", "info")
+
+    return render_template("forgot_password.html", reset_link=None)
+
+
+@auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+
+    s = _get_serializer()
+    try:
+        email = s.loads(token, salt="password-reset", max_age=1800)  # 30 min
+    except SignatureExpired:
+        flash("Este link expirou. Solicite um novo.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+    except BadSignature:
+        flash("Link inválido.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash("Usuário não encontrado.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+
+        if not password or len(password) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "danger")
+            return render_template("reset_password.html", token=token)
+
+        if password != confirm:
+            flash("As senhas não coincidem.", "danger")
+            return render_template("reset_password.html", token=token)
+
+        user.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+        db.session.commit()
+
+        flash("Senha redefinida com sucesso! Faça login com a nova senha. 🎉", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("reset_password.html", token=token)
