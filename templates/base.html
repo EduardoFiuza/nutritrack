@@ -53,6 +53,8 @@
              href="{{ url_for('main.foods') }}">🗄️ Alimentos</a></li>
       <li><a class="nav-link {% if request.endpoint == 'main.meals' %}active{% endif %}"
              href="{{ url_for('main.meals') }}">🍽️ Refeições</a></li>
+      <li><a class="nav-link {% if request.endpoint == 'main.history' %}active{% endif %}"
+             href="{{ url_for('main.history') }}">📈 Histórico</a></li>
     </ul>
 
     <div class="navbar-user">

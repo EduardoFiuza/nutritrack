@@ -2,6 +2,12 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<style>
+  @keyframes avatarBreathe {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.012); }
+  }
+</style>
 <div class="container">
   <div class="page-header">
     <h1 class="page-title">Olá, {{ current_user.name.split()[0] }}! 👋</h1>
@@ -55,6 +61,359 @@
         {% endfor %}
         {% if not summary %}
           <p style="color:var(--dim);font-size:.85rem;margin-top:6px;">Nenhuma refeição ainda.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CARD EVOLUÇÃO CORPORAL & AVATAR ─── -->
+  <div class="card" style="margin-bottom:24px; background:var(--card2); border:1px solid rgba(255,255,255,0.08); overflow:hidden; position:relative;">
+    <div style="display:grid; grid-template-columns: minmax(180px, 240px) 1fr; gap:24px; align-items:center;">
+      
+      <!-- BONECO INTERATIVO SVG (MASCULINO E FEMININO) -->
+      <div style="background:rgba(0,0,0,0.3); border-radius:16px; padding:20px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--border); position:relative; box-shadow:inset 0 0 20px rgba(0,0,0,0.3);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px; font-size:0.75rem; color:var(--dim); font-weight:700;">
+          <span style="text-transform:uppercase; letter-spacing:0.05em;">Silhueta</span>
+          <span style="background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:12px; color:var(--text);">
+            {% if is_male %}♂️ Masculino{% else %}♀️ Feminino{% endif %}
+          </span>
+        </div>
+
+        <div style="animation: avatarBreathe 3.5s ease-in-out infinite; transform-origin: center bottom;">
+          <svg viewBox="0 0 200 320" width="160" height="248" style="overflow:visible; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));">
+            <defs>
+              {% if is_male %}
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#55efc4"/>
+                <stop offset="50%" stop-color="#48dbfb"/>
+                <stop offset="100%" stop-color="{{ body_color }}"/>
+              </linearGradient>
+              <linearGradient id="shortGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#2c3e50"/>
+                <stop offset="100%" stop-color="#1a252f"/>
+              </linearGradient>
+              {% else %}
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fd79a8"/>
+                <stop offset="50%" stop-color="#e84393"/>
+                <stop offset="100%" stop-color="{{ body_color }}"/>
+              </linearGradient>
+              <linearGradient id="topGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#2c3e50"/>
+                <stop offset="100%" stop-color="#1a252f"/>
+              </linearGradient>
+              <linearGradient id="leggingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e1e2e"/>
+                <stop offset="100%" stop-color="#0d0d1a"/>
+              </linearGradient>
+              {% endif %}
+              <radialGradient id="glowBg" cx="50%" cy="55%" r="50%">
+                <stop offset="0%" stop-color="{{ body_color }}" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="{{ body_color }}" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="shoeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ecf0f1"/>
+                <stop offset="100%" stop-color="#bdc3c7"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Fundo com aura neon -->
+            <ellipse cx="100" cy="165" rx="85" ry="90" fill="url(#glowBg)"/>
+
+            <!-- Sombra no chão -->
+            <ellipse cx="100" cy="298" rx="42" ry="7" fill="rgba(0,0,0,0.4)"/>
+
+            {% if is_male %}
+            <!-- ══════════ AVATAR MASCULINO DETALHADO ══════════ -->
+
+            <!-- === PERNAS === -->
+            <!-- Coxa esquerda -->
+            <path d="M 72 175 Q 65 218 64 265" stroke="url(#skinGrad)" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <!-- Coxa direita -->
+            <path d="M 128 175 Q 135 218 136 265" stroke="url(#skinGrad)" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <!-- Joelhos -->
+            <circle cx="65" cy="230" r="8" fill="url(#skinGrad)" opacity="0.7"/>
+            <circle cx="135" cy="230" r="8" fill="url(#skinGrad)" opacity="0.7"/>
+            <!-- Canelas -->
+            <path d="M 64 240 L 67 278" stroke="url(#skinGrad)" stroke-width="13" stroke-linecap="round"/>
+            <path d="M 136 240 L 133 278" stroke="url(#skinGrad)" stroke-width="13" stroke-linecap="round"/>
+
+            <!-- Tênis esquedo -->
+            <ellipse cx="63" cy="284" rx="16" ry="7" fill="url(#shoeGrad)"/>
+            <rect x="49" y="278" width="28" height="9" rx="4" fill="#ecf0f1"/>
+            <path d="M 52 282 Q 63 278 76 282" stroke="{{ body_color }}" stroke-width="2" fill="none"/>
+            <rect x="56" y="276" width="14" height="5" rx="2.5" fill="#bdc3c7"/>
+            <!-- Tênis direito -->
+            <ellipse cx="137" cy="284" rx="16" ry="7" fill="url(#shoeGrad)"/>
+            <rect x="123" y="278" width="28" height="9" rx="4" fill="#ecf0f1"/>
+            <path d="M 126 282 Q 137 278 150 282" stroke="{{ body_color }}" stroke-width="2" fill="none"/>
+            <rect x="130" y="276" width="14" height="5" rx="2.5" fill="#bdc3c7"/>
+
+            <!-- === BERMUDA ESPORTIVA === -->
+            <path d="M 62 155 L 138 155 L 138 185 Q 110 195 100 178 Q 90 195 62 185 Z" fill="url(#shortGrad)"/>
+            <!-- Cós da bermuda -->
+            <rect x="62" y="152" width="76" height="8" rx="3" fill="#34495e"/>
+            <!-- Listras laterais neon -->
+            <line x1="64" y1="157" x2="63" y2="188" stroke="{{ body_color }}" stroke-width="2.5" opacity="0.8"/>
+            <line x1="136" y1="157" x2="137" y2="188" stroke="{{ body_color }}" stroke-width="2.5" opacity="0.8"/>
+
+            <!-- === BRAÇOS === -->
+            <!-- Braço esquerdo (levantado, mostrando bíceps) -->
+            <path d="M 72 98 Q 38 115 36 152" stroke="url(#skinGrad)" stroke-width="17" stroke-linecap="round" fill="none"/>
+            <!-- Bíceps esquerdo (bola do músculo) -->
+            <ellipse cx="52" cy="124" rx="10" ry="7" fill="url(#skinGrad)" opacity="0.5"/>
+            <!-- Braço direito -->
+            <path d="M 128 98 Q 162 115 164 152" stroke="url(#skinGrad)" stroke-width="17" stroke-linecap="round" fill="none"/>
+            <!-- Bíceps direito -->
+            <ellipse cx="148" cy="124" rx="10" ry="7" fill="url(#skinGrad)" opacity="0.5"/>
+            <!-- Punhos / Mãos -->
+            <circle cx="36" cy="154" r="8" fill="url(#skinGrad)"/>
+            <circle cx="164" cy="154" r="8" fill="url(#skinGrad)"/>
+
+            <!-- === TORSO MUSCULOSO === -->
+            <!-- Abdômen dinâmico -->
+            <ellipse cx="100" cy="138" rx="{{ belly_radius + 4 }}" ry="30" fill="url(#skinGrad)"/>
+            <!-- Regata de treino -->
+            <path d="M 68 88 Q 100 76 132 88 L 128 155 Q 100 148 72 155 Z" fill="url(#shortGrad)"/>
+            <!-- Decote em V da regata -->
+            <path d="M 84 89 Q 100 112 116 89" stroke="{{ body_color }}" stroke-width="2.5" fill="none"/>
+            <!-- Contorno dos peitorais -->
+            <path d="M 74 102 Q 88 106 98 100" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
+            <path d="M 102 100 Q 112 106 126 102" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
+            <!-- Divisão central dos peitorais -->
+            <line x1="100" y1="95" x2="100" y2="112" stroke="rgba(0,0,0,0.3)" stroke-width="2"/>
+            <!-- Abs (só se BF < 18%) -->
+            {% if bf_pct and bf_pct < 18 %}
+            <line x1="100" y1="115" x2="100" y2="148" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 91 122 Q 100 125 109 122" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
+            <path d="M 91 131 Q 100 134 109 131" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
+            <path d="M 91 140 Q 100 143 109 140" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
+            {% endif %}
+            <!-- Ombros -->
+            <ellipse cx="68" cy="97" rx="12" ry="10" fill="url(#skinGrad)"/>
+            <ellipse cx="132" cy="97" rx="12" ry="10" fill="url(#skinGrad)"/>
+
+            <!-- === PESCOÇO E CABEÇA === -->
+            <rect x="93" y="58" width="14" height="20" rx="5" fill="url(#skinGrad)"/>
+
+            <!-- Cabeça (forma mais quadrada para masculino) -->
+            <rect x="66" y="24" width="68" height="52" rx="22" fill="url(#skinGrad)"/>
+            <!-- Mandíbula um pouco mais angular -->
+            <path d="M 72 58 Q 100 74 128 58" fill="url(#skinGrad)"/>
+
+            <!-- Cabelo masculino undercut estiloso -->
+            <path d="M 68 38 Q 68 16 100 14 Q 132 16 132 38 Q 128 22 108 17 Q 100 15 88 19 Q 78 22 70 36 Z" fill="#2c3e50"/>
+            <!-- Fade lateral -->
+            <path d="M 68 38 Q 66 52 70 58" stroke="#2c3e50" stroke-width="6" stroke-linecap="round" fill="none"/>
+            <path d="M 132 38 Q 134 52 130 58" stroke="#2c3e50" stroke-width="6" stroke-linecap="round" fill="none"/>
+            <!-- Topete/textura -->
+            <path d="M 82 20 Q 100 14 116 22" stroke="#34495e" stroke-width="2" fill="none"/>
+
+            <!-- Sobrancelhas masculinas -->
+            <path d="M 80 38 Q 87 35 93 38" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M 107 38 Q 113 35 120 38" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <!-- Olhos -->
+            <ellipse cx="87" cy="44" rx="5" ry="5.5" fill="white"/>
+            <ellipse cx="113" cy="44" rx="5" ry="5.5" fill="white"/>
+            <circle cx="87" cy="44" r="3.2" fill="#1e272e"/>
+            <circle cx="113" cy="44" r="3.2" fill="#1e272e"/>
+            <circle cx="88.5" cy="42.5" r="1.2" fill="white"/>
+            <circle cx="114.5" cy="42.5" r="1.2" fill="white"/>
+            <!-- Nariz -->
+            <path d="M 100 48 Q 97 55 99 57 Q 101 58 103 57 Q 105 55 100 48" fill="rgba(0,0,0,0.12)"/>
+            <!-- Boca sorridente -->
+            <path d="M 90 62 Q 100 68 110 62" stroke="#1e272e" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <!-- Dentes -->
+            <path d="M 92 63 Q 100 68 108 63" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+            {% else %}
+            <!-- ══════════ AVATAR FEMININO DETALHADO ══════════ -->
+
+            <!-- === PERNAS / LEGGING === -->
+            <!-- Coxa esquerda (curva feminina mais pronunciada) -->
+            <path d="M 74 172 Q 66 218 66 265" stroke="url(#leggingGrad)" stroke-width="16" stroke-linecap="round" fill="none"/>
+            <!-- Coxa direita -->
+            <path d="M 126 172 Q 134 218 134 265" stroke="url(#leggingGrad)" stroke-width="16" stroke-linecap="round" fill="none"/>
+            <!-- Canelas legging -->
+            <path d="M 66 238 L 68 278" stroke="url(#leggingGrad)" stroke-width="12" stroke-linecap="round"/>
+            <path d="M 134 238 L 132 278" stroke="url(#leggingGrad)" stroke-width="12" stroke-linecap="round"/>
+            <!-- Detalhe neon lateral legging -->
+            <path d="M 61 178 L 62 270" stroke="{{ body_color }}" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+            <path d="M 139 178 L 138 270" stroke="{{ body_color }}" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+
+            <!-- Tênis femininos -->
+            <ellipse cx="65" cy="284" rx="15" ry="6" fill="url(#shoeGrad)"/>
+            <rect x="51" y="278" width="26" height="9" rx="4.5" fill="#ecf0f1"/>
+            <path d="M 53 282 Q 65 278 77 282" stroke="{{ body_color }}" stroke-width="2" fill="none"/>
+            <rect x="57" y="276" width="12" height="4" rx="2" fill="#bdc3c7"/>
+            <ellipse cx="135" cy="284" rx="15" ry="6" fill="url(#shoeGrad)"/>
+            <rect x="121" y="278" width="26" height="9" rx="4.5" fill="#ecf0f1"/>
+            <path d="M 123 282 Q 135 278 147 282" stroke="{{ body_color }}" stroke-width="2" fill="none"/>
+            <rect x="129" y="276" width="12" height="4" rx="2" fill="#bdc3c7"/>
+
+            <!-- === QUADRIL AMPULHETA === -->
+            <!-- Quadril largo -->
+            <ellipse cx="100" cy="172" rx="42" ry="14" fill="url(#skinGrad)" opacity="0.4"/>
+            <!-- Legging cintura alta (cós) -->
+            <path d="M 60 148 Q 100 158 140 148 L 140 172 Q 100 182 60 172 Z" fill="url(#leggingGrad)"/>
+            <!-- Detalhe cós neon -->
+            <path d="M 62 150 Q 100 160 138 150" stroke="{{ body_color }}" stroke-width="2" fill="none" opacity="0.7"/>
+
+            <!-- === TORSO FEMININO === -->
+            <!-- Cintura afunilada (ampulheta) -->
+            <ellipse cx="100" cy="135" rx="{{ [belly_radius - 6, 22]|max }}" ry="28" fill="url(#skinGrad)"/>
+            <!-- Top esportivo -->
+            <path d="M 66 90 Q 100 78 134 90 L 130 140 Q 100 148 70 140 Z" fill="url(#topGrad)"/>
+            <!-- Alças finas do top -->
+            <line x1="82" y1="90" x2="86" y2="64" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>
+            <line x1="118" y1="90" x2="114" y2="64" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>
+            <!-- Detalhe inferior do top (neon) -->
+            <path d="M 70 140 Q 100 148 130 140" stroke="{{ body_color }}" stroke-width="2" fill="none"/>
+            <!-- Divisão central do top -->
+            <line x1="100" y1="90" x2="100" y2="138" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <!-- Linha abdominal tonificada -->
+            {% if bf_pct and bf_pct < 24 %}
+            <line x1="100" y1="118" x2="100" y2="136" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 93 124 Q 100 127 107 124" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+            {% endif %}
+            <!-- Ombros femininos -->
+            <ellipse cx="66" cy="96" rx="10" ry="9" fill="url(#skinGrad)"/>
+            <ellipse cx="134" cy="96" rx="10" ry="9" fill="url(#skinGrad)"/>
+
+            <!-- === BRAÇOS FEMININOS === -->
+            <!-- Braço esquerdo -->
+            <path d="M 68 100 Q 44 120 42 152" stroke="url(#skinGrad)" stroke-width="12" stroke-linecap="round" fill="none"/>
+            <!-- Braço direito -->
+            <path d="M 132 100 Q 156 120 158 152" stroke="url(#skinGrad)" stroke-width="12" stroke-linecap="round" fill="none"/>
+            <!-- Mãos -->
+            <circle cx="42" cy="154" r="6.5" fill="url(#skinGrad)"/>
+            <circle cx="158" cy="154" r="6.5" fill="url(#skinGrad)"/>
+
+            <!-- === PESCOÇO E CABEÇA === -->
+            <rect x="94" y="59" width="12" height="18" rx="5" fill="url(#skinGrad)"/>
+
+            <!-- Cabeça (mais oval / arredondada para feminino) -->
+            <ellipse cx="100" cy="40" rx="30" ry="34" fill="url(#skinGrad)"/>
+
+            <!-- Cabelo rabo de cavalo -->
+            <!-- Parte traseira do cabelo (rabo) -->
+            <path d="M 122 30 Q 155 40 148 82 Q 142 78 138 62 Q 134 44 122 36" fill="#2c3e50"/>
+            <!-- Elástico neon -->
+            <circle cx="124" cy="34" r="5" fill="{{ body_color }}"/>
+            <circle cx="124" cy="34" r="3" fill="{{ body_color }}" opacity="0.5"/>
+            <!-- Cabelo frontal -->
+            <path d="M 72 32 Q 70 8 100 6 Q 130 8 128 32 Q 120 14 100 12 Q 78 14 72 32 Z" fill="#2c3e50"/>
+            <!-- Franja lateral / textura -->
+            <path d="M 72 32 Q 70 44 74 56" stroke="#2c3e50" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M 76 14 Q 100 9 120 16" stroke="#34495e" stroke-width="2" fill="none"/>
+
+            <!-- Sobrancelhas femininas (mais finas e arqueadas) -->
+            <path d="M 81 36 Q 89 31 95 34" stroke="#2c3e50" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M 105 34 Q 111 31 119 36" stroke="#2c3e50" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <!-- Olhos com cílios -->
+            <ellipse cx="89" cy="43" rx="5.5" ry="5.5" fill="white"/>
+            <ellipse cx="111" cy="43" rx="5.5" ry="5.5" fill="white"/>
+            <circle cx="89" cy="43" r="3.5" fill="#1e272e"/>
+            <circle cx="111" cy="43" r="3.5" fill="#1e272e"/>
+            <circle cx="90.5" cy="41.5" r="1.3" fill="white"/>
+            <circle cx="112.5" cy="41.5" r="1.3" fill="white"/>
+            <!-- Cílios femininos -->
+            <path d="M 84 38 Q 83 35 82 33" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M 87 37 Q 87 34 86 32" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M 91 37 Q 92 34 93 32" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M 106 37 Q 107 34 107 32" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M 109 37 Q 109 34 110 32" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M 114 38 Q 115 35 116 33" stroke="#1e272e" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- Nariz feminino delicado -->
+            <path d="M 100 47 Q 98 52 99 54 Q 101 55 103 54 Q 104 52 100 47" fill="rgba(0,0,0,0.1)"/>
+            <!-- Boca com batom -->
+            <path d="M 89 60 Q 100 67 111 60" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M 92 61 Q 100 67 108 61" stroke="#e74c3c" stroke-width="1.5" fill="none"/>
+            <!-- Bochecha rosada sutil -->
+            <ellipse cx="80" cy="52" rx="7" ry="4" fill="{{ body_color }}" opacity="0.15"/>
+            <ellipse cx="120" cy="52" rx="7" ry="4" fill="{{ body_color }}" opacity="0.15"/>
+
+            {% endif %}
+          </svg>
+        </div>
+
+        <div style="font-size:0.8rem; font-weight:800; color:{{ body_color }}; margin-top:12px; text-align:center;">
+          {{ body_status }}
+        </div>
+      </div>
+
+      <!-- DADOS CORPORAIS E ATUALIZAÇÃO -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+          <div>
+            <h2 style="font-size:1.2rem; font-weight:800; color:var(--text); margin:0;">
+              🧍 Minha Evolução Corporal
+            </h2>
+            <p style="font-size:0.85rem; color:var(--dim); margin-top:2px;">
+              Veja seu avatar afinar a cintura e reduzir gordura conforme você atinge suas metas!
+            </p>
+          </div>
+          {% if current_user.weight_kg and current_user.height_cm %}
+          <span class="badge" style="background:rgba(255,255,255,0.06); border:1px solid {{ body_color }}; color:{{ body_color }}; font-weight:700; padding:6px 12px; font-size:0.82rem;">
+            {{ body_status }}
+          </span>
+          {% endif %}
+        </div>
+
+        {% if current_user.weight_kg and current_user.height_cm %}
+        <!-- Grade de Indicadores -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:12px; margin-bottom:18px;">
+          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+            <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">Gordura Est.</div>
+            <div style="font-size:1.4rem; font-weight:800; color:{{ body_color }}; line-height:1.2; margin-top:2px;">
+              {{ bf_pct }}%
+            </div>
+            <div style="font-size:0.68rem; color:var(--dim);">BF corporal</div>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+            <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">IMC</div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--yellow); line-height:1.2; margin-top:2px;">
+              {{ bmi }}
+            </div>
+            <div style="font-size:0.68rem; color:var(--dim);">Índice massa</div>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+            <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">Peso Atual</div>
+            <div style="font-size:1.4rem; font-weight:800; color:var(--green); line-height:1.2; margin-top:2px;">
+              {{ current_user.weight_kg }} <span style="font-size:0.8rem; font-weight:400;">kg</span>
+            </div>
+            <div style="font-size:0.68rem; color:var(--dim);">Altura: {{ current_user.height_cm|int }} cm</div>
+          </div>
+        </div>
+
+        <!-- Formulário de Atualização de Peso -->
+        <div style="background:rgba(255,255,255,0.02); padding:14px 16px; border-radius:10px; border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text);">Subiu na balança hoje?</div>
+            <div style="font-size:0.75rem; color:var(--dim);">Atualize seu peso e veja o boneco mudar na hora:</div>
+          </div>
+
+          <form method="POST" action="{{ url_for('main.update_weight') }}" style="display:flex; align-items:center; gap:8px; margin:0;">
+            <div style="position:relative; width:110px;">
+              <input type="number" step="0.1" name="weight_kg" value="{{ current_user.weight_kg }}" class="form-control" style="padding-right:28px;" required />
+              <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--dim); pointer-events:none;">kg</span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="font-weight:600; padding:8px 14px;">
+              ⚖️ Atualizar
+            </button>
+          </form>
+        </div>
+
+        {% else %}
+        <div style="padding:20px; background:rgba(0,0,0,0.2); border-radius:10px; border:1px dashed var(--border); text-align:center;">
+          <p style="color:var(--dim); font-size:0.9rem; margin-bottom:12px;">
+            Para ativar seu avatar corporal e o cálculo de gordura, preencha sua altura e peso na calculadora de TMB!
+          </p>
+          <a href="{{ url_for('main.bmr') }}" class="btn btn-primary btn-sm">Calcular TMB & Perfil →</a>
+        </div>
         {% endif %}
       </div>
     </div>

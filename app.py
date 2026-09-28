@@ -42,7 +42,7 @@ def create_app():
 
     # Criar tabelas + seed
     with app.app_context():
-        from models import User, Food, DietDay, Meal, MealItem
+        from models import User, Food, DietDay, Meal, MealItem, FavoriteMeal, FavoriteMealItem
         db.create_all()
         _seed_foods()
     

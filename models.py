@@ -85,3 +85,24 @@ class MealItem(db.Model):
     food_id = db.Column(db.Integer, db.ForeignKey("foods.id"), nullable=False)
     quantity_g = db.Column(db.Float, nullable=False)
     food = db.relationship("Food")
+
+
+class FavoriteMeal(db.Model):
+    __tablename__ = "favorite_meals"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    meal_type = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    items = db.relationship("FavoriteMealItem", backref="favorite_meal", lazy=True,
+                            cascade="all, delete-orphan")
+
+
+class FavoriteMealItem(db.Model):
+    __tablename__ = "favorite_meal_items"
+    id = db.Column(db.Integer, primary_key=True)
+    favorite_meal_id = db.Column(db.Integer, db.ForeignKey("favorite_meals.id"), nullable=False)
+    food_id = db.Column(db.Integer, db.ForeignKey("foods.id"), nullable=False)
+    quantity_g = db.Column(db.Float, nullable=False)
+    food = db.relationship("Food")
+

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Histórico{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+      <h1 class="page-title">📈 Histórico de Alimentação</h1>
+      <p class="page-subtitle">Acompanhe sua consistência e evolução ao longo do tempo</p>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <a href="{{ url_for('main.history', view='week') }}" class="btn {% if view_type == 'week' %}btn-primary{% else %}btn-secondary{% endif %}">
+        📅 Semanal
+      </a>
+      <a href="{{ url_for('main.history', view='month') }}" class="btn {% if view_type == 'month' %}btn-primary{% else %}btn-secondary{% endif %}">
+        🗓️ Mensal
+      </a>
+    </div>
+  </div>
+
+  {% if view_type == 'week' %}
+  <!-- ─── VISÃO SEMANAL ─── -->
+  <div class="card" style="margin-bottom:20px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; background:var(--card2); flex-wrap:wrap; gap:10px;">
+    <a href="{{ url_for('main.history', view='week', ref_date=prev_week) }}" class="btn btn-secondary btn-sm">◀ 7 dias anteriores</a>
+    <span style="font-weight:600; font-size:0.95rem; color:var(--text);">Últimos 7 dias (até {{ days_data[-1].formatted_date }})</span>
+    <a href="{{ url_for('main.history', view='week', ref_date=next_week) }}" class="btn btn-secondary btn-sm">Próximos 7 dias ▶</a>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:24px;">
+    {% for day in days_data %}
+    <a href="{{ url_for('main.meals', date=day.date) }}" style="text-decoration:none; color:inherit;">
+      <div class="card" style="padding:14px 10px; text-align:center; transition:transform .15s, border-color .15s; height:100%; display:flex; flex-direction:column; justify-content:space-between; {% if day.is_today %}border:2px solid var(--accent);{% endif %}">
+        <div>
+          <div style="font-size:0.75rem; color:var(--dim); text-transform:uppercase; font-weight:700;">{{ day.weekday }}</div>
+          <div style="font-size:0.9rem; font-weight:600; margin-bottom:8px;">{{ day.formatted_date }}</div>
+          
+          <div style="font-size:1.3rem; font-weight:800; color:{% if day.total_kcal > 0 %}var(--yellow){% else %}var(--dim){% endif %};">
+            {{ day.total_kcal|int }}
+          </div>
+          <div style="font-size:0.7rem; color:var(--dim); margin-bottom:8px;">kcal</div>
+        </div>
+
+        <div>
+          <div class="progress-bar" style="height:6px; margin:4px 0; background:rgba(0,0,0,0.2);">
+            <div class="progress-fill {% if day.pct_kcal >= 100 %}over{% endif %}" style="width:{{ day.pct_kcal }}%;"></div>
+          </div>
+          
+          <div style="font-size:0.75rem; color:var(--prot); font-weight:600; margin-top:6px;">
+            {{ day.total_prot|int }}g prot
+          </div>
+          
+          <div style="font-size:0.7rem; color:var(--dim); margin-top:2px;">
+            {{ day.meal_count }} refeição(ões)
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- ─── VISÃO MENSAL ─── -->
+  <div class="card" style="margin-bottom:20px; padding:16px; background:var(--card2); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <form method="GET" action="{{ url_for('main.history') }}" style="display:flex; align-items:center; gap:8px; margin:0;">
+      <input type="hidden" name="view" value="month" />
+      <label style="font-size:0.88rem; font-weight:600; color:var(--dim);">Mês:</label>
+      <input type="month" name="month" value="{{ selected_month }}" class="form-control" style="width:auto; padding:6px 10px;" onchange="this.form.submit();" />
+    </form>
+    <div style="display:flex; gap:16px; font-size:0.88rem; color:var(--dim); flex-wrap:wrap;">
+      <span>Dias registrados: <strong style="color:var(--text);">{{ days_with_records }}</strong></span>
+      <span>Média diária: <strong style="color:var(--yellow);">{{ avg_kcal }} kcal</strong></span>
+      <span>Média proteína: <strong style="color:var(--prot);">{{ avg_prot }}g</strong></span>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0; overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem; min-width:600px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--dim); font-size:0.75rem; text-transform:uppercase;">
+          <th style="padding:12px 16px;">Data</th>
+          <th style="padding:12px 16px;">Calorias</th>
+          <th style="padding:12px 16px;">Proteína</th>
+          <th style="padding:12px 16px;">Carboidrato</th>
+          <th style="padding:12px 16px;">Gordura</th>
+          <th style="padding:12px 16px; text-align:right;">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in month_records %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 16px;">
+            <strong>{{ r.formatted_date }}</strong> <span style="font-size:0.8rem; color:var(--dim);">({{ r.weekday }})</span>
+          </td>
+          <td style="padding:12px 16px; font-weight:700; color:var(--yellow);">{{ r.total_kcal }} kcal</td>
+          <td style="padding:12px 16px; color:var(--prot);">{{ r.total_prot }}g</td>
+          <td style="padding:12px 16px; color:var(--carb);">{{ r.total_carb }}g</td>
+          <td style="padding:12px 16px; color:var(--fat);">{{ r.total_fat }}g</td>
+          <td style="padding:12px 16px; text-align:right;">
+            <a href="{{ url_for('main.meals', date=r.date) }}" class="btn btn-secondary btn-sm">Ver refeições →</a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not month_records %}
+        <tr>
+          <td colspan="6" style="padding:32px; text-align:center; color:var(--dim);">
+            Nenhuma refeição registrada para este mês.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

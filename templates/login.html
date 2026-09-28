@@ -8,6 +8,11 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
 </head>
 <body>
+{% if app_env != 'production' %}
+<div style="background-color: var(--yellow); color: var(--bg); text-align: center; font-weight: bold; font-size: 0.85rem; padding: 6px; z-index: 9999; position: relative;">
+  🚧 AMBIENTE DE HOMOLOGAÇÃO (TESTES) 🚧
+</div>
+{% endif %}
 <div class="auth-page">
   <div class="auth-card">
     <div class="auth-logo">

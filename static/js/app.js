@@ -33,7 +33,14 @@ let selectedFood = null;
 if (foodSearchInput) {
   foodSearchInput.addEventListener('input', async () => {
     const q = foodSearchInput.value.trim();
-    if (q.length < 1) { foodDropdown.innerHTML = ''; foodDropdown.style.display='none'; return; }
+    if (q.length < 1) {
+      foodDropdown.innerHTML = '';
+      foodDropdown.style.display = 'none';
+      window.selectedFood = null;
+      if (foodIdInput) foodIdInput.value = '';
+      if (previewDiv) previewDiv.innerHTML = '';
+      return;
+    }
 
     const res = await fetch(`/api/foods?q=${encodeURIComponent(q)}`);
     const foods = await res.json();
@@ -93,7 +100,10 @@ if (foodSearchInput) {
 // ... (seletor de medida permanece igual)
 
 function updatePreview() {
-  if (!window.selectedFood || !qtyInput) return;
+  if (!window.selectedFood || !qtyInput || !foodSearchInput || !foodSearchInput.value.trim() || !foodIdInput || !foodIdInput.value) {
+    if (previewDiv) previewDiv.innerHTML = '';
+    return;
+  }
   
   const measure = document.getElementById('measure-select').value;
   let qty = parseFloat(qtyInput.value) || 0;

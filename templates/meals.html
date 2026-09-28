@@ -10,8 +10,64 @@
 
   <div class="grid-2" style="align-items:start;gap:24px;">
 
-    <!-- ── COLUNA ESQUERDA: Adicionar ──────────────────────────── -->
+    <!-- ── COLUNA ESQUERDA: Adicionar e Favoritos ─────────────── -->
     <div>
+      <!-- ── CARD REFEIÇÕES FAVORITAS ── -->
+      {% if favorites %}
+      <div class="card" style="margin-bottom:16px; background:var(--card2); border:1px solid rgba(249,202,36,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="font-size:0.95rem; font-weight:700; color:var(--yellow); margin:0;">
+            ⭐ Meus Favoritos Rápidos
+          </h2>
+          <span style="font-size:0.75rem; color:var(--dim);">1 clique para lançar</span>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          {% for fav in favorites %}
+          <div style="padding:10px 12px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:0.88rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                {{ fav.name }}
+              </div>
+              <div style="font-size:0.75rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ fav.items_text }}">
+                {{ fav.items_text }}
+              </div>
+              <div style="font-size:0.75rem; margin-top:2px;">
+                <span style="color:var(--yellow); font-weight:600;">🔥 {{ fav.total_kcal }} kcal</span> | 
+                <span style="color:var(--prot); font-weight:600;">💪 {{ fav.total_prot }}g</span> | 
+                <span class="badge badge-purple" style="font-size:0.68rem; padding:1px 6px;">{{ fav.meal_type }}</span>
+              </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:6px;">
+              <form method="POST" action="{{ url_for('main.apply_favorite', fav_id=fav.id) }}" style="margin:0; display:flex; align-items:center; gap:4px;">
+                <input type="hidden" name="date" value="{{ selected_date }}" />
+                <select name="meal_type" class="form-control" style="width:auto; padding:3px 6px; font-size:0.75rem; height:auto; background:var(--card); border:1px solid var(--border); color:var(--text);" title="Escolha onde lançar">
+                  {% for mt in meal_types %}
+                    <option value="{{ mt }}" {% if mt == fav.meal_type %}selected{% endif %}>{{ mt }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-success btn-sm" style="padding:4px 8px; font-size:0.8rem; font-weight:600;" title="Lançar nesta refeição">
+                  ➕ Lançar
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('main.delete_favorite', fav_id=fav.id) }}" style="margin:0;" onsubmit="return confirm('Remover este favorito?');">
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" style="padding:4px 6px; font-size:0.75rem;" title="Excluir favorito">
+                  ✕
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="card" style="margin-bottom:16px; padding:12px 14px; background:rgba(249,202,36,0.04); border:1px dashed rgba(249,202,36,0.25); border-radius:10px;">
+        <div style="font-size:0.82rem; color:var(--yellow); font-weight:600; margin-bottom:2px;">💡 Dica: Salve seus Pratos Favoritos!</div>
+        <div style="font-size:0.75rem; color:var(--dim); line-height:1.4;">Monte seu prato e clique em <strong>⭐ Salvar Favorito</strong> nele para lançar tudo com 1 clique no futuro!</div>
+      </div>
+      {% endif %}
+
       <div class="card" style="margin-bottom:16px;">
         <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--green);">➕ Adicionar Alimento</h2>
 
@@ -22,7 +78,7 @@
             <div style="display:flex;gap:8px;">
               <input type="date" name="date" class="form-control" value="{{ selected_date }}" required />
               <button type="button" class="btn btn-secondary"
-                      onclick="document.querySelector('[name=date]').value='{{ selected_date }}'">Hoje</button>
+                      onclick="document.querySelector('#add-form [name=date]').value='{{ today }}'">Hoje</button>
             </div>
           </div>
 
@@ -82,11 +138,17 @@
 
     <!-- ── COLUNA DIREITA: Resumo do dia ──────────────────────── -->
     <div id="right-column">
-      <!-- Seletor de data -->
-      <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;" id="date-select-form">
-        <input type="date" name="date" class="form-control" value="{{ selected_date }}" onchange="document.getElementById('date-select-form').submit();" />
-        <button type="submit" class="btn btn-secondary" style="display:none;">Ver dia</button>
-      </form>
+      <!-- Seletor e Navegação de Data -->
+      <div class="card" style="margin-bottom:16px; padding:10px 14px; background:var(--card2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <a href="{{ url_for('main.meals', date=prev_date) }}" class="btn btn-secondary btn-sm" title="Dia anterior">◀ Ontem</a>
+          <a href="{{ url_for('main.meals', date=today) }}" class="btn {% if selected_date == today %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Hoje</a>
+          <a href="{{ url_for('main.meals', date=next_date) }}" class="btn btn-secondary btn-sm" title="Próximo dia">Amanhã ▶</a>
+        </div>
+        <form method="GET" action="{{ url_for('main.meals') }}" style="display:flex; align-items:center; gap:6px; margin:0;" id="date-select-form">
+          <input type="date" name="date" class="form-control" value="{{ selected_date }}" style="width:auto; padding:4px 8px; font-size:0.85rem;" onchange="this.form.submit();" />
+        </form>
+      </div>
 
       <!-- Totais do dia -->
       <div class="card" style="margin-bottom:16px;background:var(--card2); position:relative; overflow:hidden;">
@@ -155,9 +217,15 @@
               <div class="meal-dot" style="background:{{ colors[ci] }};"></div>
               {{ meal_type }}
             </div>
-            <div class="meal-total">
-               🔥 <span class="meal-kcal-val" data-meal="{{ meal_type }}">{{ m.total_kcal }}</span> | 
-               💪 <span class="meal-prot-val" data-meal="{{ meal_type }}">{{ m.total_prot }}</span>g
+            <div class="meal-total" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+               <span>🔥 <span class="meal-kcal-val" data-meal="{{ meal_type }}">{{ m.total_kcal }}</span> | 
+               💪 <span class="meal-prot-val" data-meal="{{ meal_type }}">{{ m.total_prot }}</span>g</span>
+               {% if m.meal_id and m['items'] %}
+               <button type="button" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.75rem; border-color:rgba(249,202,36,0.5); color:var(--yellow);"
+                       onclick="promptSaveFav({{ m.meal_id }}, '{{ meal_type }}')" title="Salvar estes alimentos como favorito">
+                 ⭐ Salvar Favorito
+               </button>
+               {% endif %}
             </div>
           </div>
           <div class="meal-items">
@@ -189,10 +257,10 @@
       {% endfor %}
 
       {% if not summary %}
-      <div style="text-align:center;padding:36px 20px;color:var(--dim);border:1px dashed var(--border);border-radius:var(--radius);">
+      <div style="text-align:center;padding:36px 20px;color:var(--dim);border:1px dashed var(--border);border-radius:var(--radius);background:var(--card2);">
         <div style="font-size:2.5rem;margin-bottom:12px;">🍽️</div>
-        <p>Nenhuma refeição registrada para {{ selected_date }}.</p>
-        <p style="font-size:.85rem;margin-top:6px;">Use o formulário ao lado para adicionar alimentos.</p>
+        <p style="font-weight:600;color:var(--text);font-size:1rem;">Nenhuma refeição registrada em {{ formatted_date }}.</p>
+        <p style="font-size:.85rem;margin-top:6px;color:var(--dim);">Adicione seus alimentos no formulário ao lado ou use ◀ Ontem para navegar no histórico.</p>
       </div>
       {% endif %}
     </div>
@@ -246,10 +314,17 @@ document.addEventListener("DOMContentLoaded", function() {
           document.getElementById("right-column").innerHTML = newRightCol.innerHTML;
         }
 
-        // 2. Limpar os inputs de busca
+        // 2. Limpar os inputs de busca e a prévia
         document.getElementById("food-search").value = "";
         document.getElementById("food_id").value = "";
-        document.getElementById("portion-result").innerHTML = "";
+        window.selectedFood = null;
+        const prev = document.getElementById("add-preview");
+        if (prev) prev.innerHTML = "";
+        const customWrap = document.getElementById("custom-weight-wrap");
+        if (customWrap) customWrap.style.display = "none";
+        const measureSelect = document.getElementById("measure-select");
+        if (measureSelect) measureSelect.value = "g";
+        document.getElementById("quantity_g").value = "100";
 
         // 3. Atualizar a URL no navegador sem recarregar a tela
         window.history.pushState(null, "", "/meals?date=" + selectedDate);
@@ -266,5 +341,43 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
+
+function promptSaveFav(mealId, mealType) {
+  const modal = document.getElementById('fav-modal');
+  const form = document.getElementById('fav-form');
+  const input = document.getElementById('fav-name-input');
+  form.action = '/favorites/save/' + mealId;
+  input.value = 'Meu ' + mealType;
+  modal.style.display = 'flex';
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+
+function closeFavModal() {
+  document.getElementById('fav-modal').style.display = 'none';
+}
 </script>
+
+<!-- Modal Salvar Favorito -->
+<div id="fav-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+  <div class="card" style="width:100%; max-width:420px; background:var(--card); border:1px solid var(--accent); padding:24px; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.6); animation: slideIn 0.2s ease;">
+    <h3 style="font-size:1.15rem; font-weight:700; color:var(--yellow); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+      ⭐ Salvar como Favorito
+    </h3>
+    <p style="font-size:0.85rem; color:var(--dim); margin-bottom:18px; line-height:1.4;">
+      Dê um nome para este prato para poder lançar todos os alimentos dele com 1 clique sempre que quiser!
+    </p>
+    
+    <form method="POST" id="fav-form" action="">
+      <input type="hidden" name="date" value="{{ selected_date }}" />
+      <div class="form-group">
+        <label class="form-label" style="font-size:0.85rem; font-weight:600;">🏷️ Nome do Favorito</label>
+        <input type="text" name="name" id="fav-name-input" class="form-control" placeholder="Ex: Meu Café Padrão" required />
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeFavModal()">Cancelar</button>
+        <button type="submit" class="btn btn-success" style="font-weight:600;">Salvar ⭐</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
