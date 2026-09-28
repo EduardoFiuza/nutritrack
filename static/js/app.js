@@ -202,7 +202,10 @@ document.addEventListener('submit', async e => {
     try {
       const res = await fetch(form.action, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' }
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRFToken': form.querySelector('[name="csrf_token"]').value
+        }
       });
       const data = await res.json();
 

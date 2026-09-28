@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from urllib.parse import urljoin, urlparse
 from extensions import db, bcrypt
 from models import User
 
@@ -22,7 +23,12 @@ def login():
             login_user(user, remember=remember)
             next_page = request.args.get("next")
             flash(f"Bem-vindo de volta, {user.name}! 👋", "success")
-            return redirect(next_page or url_for("main.dashboard"))
+            if next_page:
+                target = urlparse(urljoin(request.host_url, next_page))
+                host = urlparse(request.host_url)
+                if target.scheme in ("http", "https") and target.netloc == host.netloc:
+                    return redirect(target.geturl())
+            return redirect(url_for("main.dashboard"))
         else:
             flash("E-mail ou senha incorretos.", "danger")
 

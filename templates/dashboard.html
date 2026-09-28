@@ -397,6 +397,7 @@
           </div>
 
           <form method="POST" action="{{ url_for('main.update_weight') }}" style="display:flex; align-items:center; gap:8px; margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <div style="position:relative; width:110px;">
               <input type="number" step="0.1" name="weight_kg" value="{{ current_user.weight_kg }}" class="form-control" style="padding-right:28px;" required />
               <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--dim); pointer-events:none;">kg</span>

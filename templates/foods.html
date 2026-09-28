@@ -68,6 +68,7 @@
               {% if food.user_id == current_user.id %}
               <form method="POST" action="{{ url_for('main.delete_food', food_id=food.id) }}"
                     style="display:inline;" onsubmit="return confirm('Excluir {{ food.name }}?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir">🗑️</button>
               </form>
               {% endif %}
@@ -91,6 +92,7 @@
   <div class="card" style="width:100%;max-width:460px;">
     <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px;color:var(--green);">➕ Adicionar Alimento</h2>
     <form method="POST" action="{{ url_for('main.add_food') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label class="form-label">Nome do Alimento *</label>
         <input type="text" name="name" class="form-control" placeholder="ex: Banana" required autofocus />
@@ -139,6 +141,7 @@
   <div class="card" style="width:100%;max-width:460px;">
     <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px;color:var(--accent);">✏️ Editar Alimento</h2>
     <form method="POST" id="edit-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="form-group">
         <label class="form-label">Nome *</label>
         <input type="text" name="name" id="edit-name" class="form-control" required />

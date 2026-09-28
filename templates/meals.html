@@ -41,6 +41,7 @@
             
             <div style="display:flex; align-items:center; gap:6px;">
               <form method="POST" action="{{ url_for('main.apply_favorite', fav_id=fav.id) }}" style="margin:0; display:flex; align-items:center; gap:4px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="hidden" name="date" value="{{ selected_date }}" />
                 <select name="meal_type" class="form-control" style="width:auto; padding:3px 6px; font-size:0.75rem; height:auto; background:var(--card); border:1px solid var(--border); color:var(--text);" title="Escolha onde lançar">
                   {% for mt in meal_types %}
@@ -52,6 +53,7 @@
                 </button>
               </form>
               <form method="POST" action="{{ url_for('main.delete_favorite', fav_id=fav.id) }}" style="margin:0;" onsubmit="return confirm('Remover este favorito?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <button type="submit" class="btn btn-danger btn-sm btn-icon" style="padding:4px 6px; font-size:0.75rem;" title="Excluir favorito">
                   ✕
                 </button>
@@ -72,6 +74,7 @@
         <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--green);">➕ Adicionar Alimento</h2>
 
         <form method="POST" action="{{ url_for('main.add_meal_item') }}" id="add-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <!-- Data -->
           <div class="form-group">
             <label class="form-label">📅 Data</label>
@@ -243,6 +246,7 @@
                 <form method="POST" class="ajax-delete-form"
                       action="{{ url_for('main.delete_meal_item', item_id=item.id) }}"
                       style="margin:0;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Remover">✕</button>
                 </form>
               </div>
@@ -368,6 +372,7 @@ function closeFavModal() {
     </p>
     
     <form method="POST" id="fav-form" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <input type="hidden" name="date" value="{{ selected_date }}" />
       <div class="form-group">
         <label class="form-label" style="font-size:0.85rem; font-weight:600;">🏷️ Nome do Favorito</label>

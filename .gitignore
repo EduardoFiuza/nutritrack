@@ -17,6 +17,7 @@ env/
 
 # Variáveis de ambiente (NUNCA commitar!)
 .env
+.env.py
 
 # IDE
 .vscode/

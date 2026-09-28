@@ -13,6 +13,7 @@
     <div class="card">
       <h2 style="font-size:1rem;font-weight:700;margin-bottom:20px;color:var(--accent);">Seus dados</h2>
       <form method="POST" action="{{ url_for('main.bmr') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">⚖️ Peso (kg)</label>

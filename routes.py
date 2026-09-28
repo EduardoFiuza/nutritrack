@@ -1,4 +1,5 @@
 from datetime import date as date_cls, datetime, timedelta
+import math
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import or_
@@ -175,6 +176,19 @@ def bmr():
             flash("Verifique os valores inseridos.", "danger")
             return redirect(url_for("main.bmr"))
 
+        if (
+            not math.isfinite(weight)
+            or not math.isfinite(height)
+            or not 30 <= weight <= 300
+            or not 100 <= height <= 250
+            or not 10 <= age <= 120
+            or sex not in ("M", "F")
+            or activity not in ACTIVITY_LEVELS
+            or goal not in GOALS
+        ):
+            flash("Verifique os valores inseridos.", "danger")
+            return redirect(url_for("main.bmr"))
+
         result = get_full_analysis(weight, height, age, sex, activity, goal)
 
         # Salvar perfil
@@ -242,6 +256,14 @@ def add_food():
         flash("Preencha todos os campos corretamente.", "danger")
         return redirect(url_for("main.foods"))
 
+    if (
+        not name
+        or not all(math.isfinite(value) and value >= 0 for value in (kcal, protein, carbs, fat))
+        or (g_per_unit is not None and (not math.isfinite(g_per_unit) or g_per_unit <= 0))
+    ):
+        flash("Preencha os dados do alimento com valores válidos.", "danger")
+        return redirect(url_for("main.foods"))
+
     food = Food(name=name, kcal_per_100g=kcal,
                 protein_per_100g=protein, 
                 carbs_per_100g=carbs,
@@ -275,6 +297,25 @@ def edit_food(food_id):
         or_(Food.user_id == current_user.id, Food.user_id == None)
     ).first_or_404()
 
+    try:
+        name = request.form["name"].strip()
+        kcal = float(request.form["kcal"].replace(",", "."))
+        protein = float(request.form["protein"].replace(",", "."))
+        unit_name = request.form.get("unit_name", "").strip() or None
+        g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
+        g_per_unit = float(g_per_unit) if g_per_unit else None
+    except (ValueError, KeyError):
+        flash("Preencha todos os campos corretamente.", "danger")
+        return redirect(url_for("main.foods"))
+
+    if (
+        not name
+        or not all(math.isfinite(value) and value >= 0 for value in (kcal, protein))
+        or (g_per_unit is not None and (not math.isfinite(g_per_unit) or g_per_unit <= 0))
+    ):
+        flash("Preencha os dados do alimento com valores válidos.", "danger")
+        return redirect(url_for("main.foods"))
+
     # Se for global (None), criamos uma CÓPIA pessoal para não afetar os outros
     # Se for do usuário, editamos o original.
     is_global = (food.user_id is None)
@@ -288,13 +329,11 @@ def edit_food(food_id):
         target = food
         flash("Alimento atualizado! ✅", "success")
 
-    target.name = request.form["name"].strip()
-    target.kcal_per_100g = float(request.form["kcal"].replace(",", "."))
-    target.protein_per_100g = float(request.form["protein"].replace(",", "."))
+    target.name = name
+    target.kcal_per_100g = kcal
+    target.protein_per_100g = protein
     target.category = request.form.get("category", "Outros")
-    
-    unit_name = request.form.get("unit_name", "").strip() or None
-    g_per_unit = request.form.get("g_per_unit", "").replace(",", ".")
+
     target.unit_name = unit_name
     target.g_per_unit = float(g_per_unit) if g_per_unit else None
     
@@ -391,6 +430,20 @@ def add_meal_item():
     except (ValueError, KeyError):
         flash("Preencha todos os campos.", "danger")
         return redirect(url_for("main.meals"))
+
+    try:
+        datetime.strptime(selected_date, "%Y-%m-%d")
+    except ValueError:
+        flash("Data inválida.", "danger")
+        return redirect(url_for("main.meals"))
+
+    if (
+        meal_type not in MEAL_TYPES
+        or not math.isfinite(quantity_g)
+        or quantity_g <= 0
+    ):
+        flash("Refeição ou quantidade inválida.", "danger")
+        return redirect(url_for("main.meals", date=selected_date))
 
     # Verificar que o alimento existe e pertence ao usuário ou é global
     food = Food.query.filter(
