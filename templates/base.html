@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}NutriTrack{% endblock %} — Controle Nutricional</title>
   <meta name="description" content="Controle suas calorias, proteínas e refeições com o NutriTrack." />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ '20260417-1547' }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ '20261001-clean-palette' }}" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
   {% block head %}{% endblock %}
   <style>
@@ -36,7 +36,7 @@
 </head>
 <body>
   {% if app_env != 'production' %}
-  <div style="background-color: var(--yellow); color: var(--bg); text-align: center; font-weight: bold; font-size: 0.85rem; padding: 6px; z-index: 9999; position: relative;">
+  <div style="background-color: #CCFBF1; color: #0F766E; text-align: center; font-weight: bold; font-size: 0.85rem; padding: 6px; z-index: 9999; position: relative;">
     🚧 AMBIENTE DE HOMOLOGAÇÃO (TESTES) 🚧
   </div>
   {% endif %}

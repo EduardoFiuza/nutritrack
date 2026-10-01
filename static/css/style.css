@@ -4,24 +4,24 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0f1117;
-  --surface:  #1a1d27;
-  --card:     #22263a;
-  --card2:    #2a2f47;
-  --accent:   #6c63ff;
-  --accent2:  #ff6584;
-  --green:    #43e97b;
+  --bg:       #F8FAFC;
+  --surface:  #FFFFFF;
+  --card:     #FFFFFF;
+  --card2:    #F8FAFC;
+  --accent:   #2563EB;
+  --accent2:  #2DD4BF;
+  --green:    #0E9F6E;
   --yellow:   #f9ca24;
   --red:      #ff4757;
-  --prot:     #43e97b;
-  --carb:     #6c63ff;
-  --fat:      #f9ca24;
-  --text:     #e8eaf6;
+  --prot:     #2563EB;
+  --carb:     #2DD4BF;
+  --fat:      #0E9F6E;
+  --text:     #0F172A;
 
-  --dim:      #9098b1;
-  --border:   #2e3250;
+  --dim:      #64748B;
+  --border:   #E2E8F0;
   --radius:   12px;
-  --shadow:   0 4px 24px rgba(0,0,0,.4);
+  --shadow:   0 4px 24px rgba(15,23,42,.08);
 }
 
 html { scroll-behavior: smooth; }
@@ -35,7 +35,7 @@ body {
 }
 
 a { color: var(--accent); text-decoration: none; }
-a:hover { color: #a89fff; }
+a:hover { color: #1D4ED8; }
 
 /* ─── Navbar ───────────────────────────────────────────────────────────────── */
 .navbar {
@@ -164,8 +164,9 @@ a:hover { color: #a89fff; }
 .progress-fill {
   height: 100%; border-radius: 99px;
   transition: width .6s ease;
-  background: linear-gradient(90deg, var(--accent), var(--green));
+  background: linear-gradient(90deg, var(--accent2), var(--green));
 }
+.progress-fill.protein { background: var(--prot); }
 .progress-fill.over { background: linear-gradient(90deg, var(--yellow), var(--red)); }
 
 /* ─── Forms ─────────────────────────────────────────────────────────────────── */
@@ -200,9 +201,9 @@ select.form-control option { background: var(--card); }
   white-space: nowrap;
 }
 .btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: #5548e0; color: #fff; }
-.btn-success { background: var(--green); color: #0f1117; }
-.btn-success:hover { background: #2ecc71; color: #0f1117; }
+.btn-primary:hover { background: #1D4ED8; color: #fff; }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #0B8A5F; color: #fff; }
 .btn-danger { background: var(--red); color: #fff; }
 .btn-danger:hover { background: #e84118; color: #fff; }
 .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
@@ -218,7 +219,7 @@ select.form-control option { background: var(--card); }
 }
 .alert-success { background: rgba(67,233,123,.12); border: 1px solid var(--green); color: var(--green); }
 .alert-danger  { background: rgba(255,71,87,.12); border: 1px solid var(--red); color: var(--red); }
-.alert-info    { background: rgba(108,99,255,.12); border: 1px solid var(--accent); color: #a89fff; }
+.alert-info    { background: #EFF6FF; border: 1px solid #BFDBFE; color: #2563EB; }
 .alert-warning { background: rgba(249,202,36,.12); border: 1px solid var(--yellow); color: var(--yellow); }
 
 /* ─── Tables ────────────────────────────────────────────────────────────────── */
@@ -281,7 +282,7 @@ tbody tr:last-child { border-bottom: none; }
 .auth-page {
   min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 30% 30%, #1a1450 0%, var(--bg) 60%);
+  background: var(--bg);
   padding: 24px;
 }
 .auth-card {
@@ -310,8 +311,8 @@ tbody tr:last-child { border-bottom: none; }
 
 /* Tip box */
 .tip-box {
-  background: rgba(67,233,123,.06);
-  border: 1px solid rgba(67,233,123,.2);
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
   border-radius: 10px;
   padding: 14px 18px;
   margin-top: 16px;
@@ -341,10 +342,10 @@ tbody tr:last-child { border-bottom: none; }
   display: inline-block; padding: 3px 10px; border-radius: 99px;
   font-size: .75rem; font-weight: 600;
 }
-.badge-purple { background: rgba(108,99,255,.2); color: var(--accent); }
-.badge-green  { background: rgba(67,233,123,.2); color: var(--green); }
+.badge-purple { background: #EFF6FF; color: var(--accent); }
+.badge-green  { background: #ECFDF5; color: var(--green); }
 .badge-yellow { background: rgba(249,202,36,.2); color: var(--yellow); }
-.badge-pink   { background: rgba(255,101,132,.2); color: var(--accent2); }
+.badge-pink   { background: #E6FFFB; color: #0F766E; }
 
 /* ─── Mobile Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {

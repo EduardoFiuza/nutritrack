@@ -16,9 +16,9 @@
 
   <!-- Stat Cards -->
   <div class="grid-3" style="margin-bottom:24px;">
-    <div class="card stat-card">
+    <div class="card stat-card calories">
       <div class="card-title">🔥 Calorias Hoje</div>
-      <div class="card-value" style="color:var(--yellow);">
+      <div class="card-value" style="color:var(--green);">
         {{ total_kcal }} <span class="card-unit">kcal</span>
       </div>
       <div class="progress-wrap">
@@ -29,13 +29,13 @@
           <div class="progress-fill {% if pct_kcal >= 100 %}over{% endif %}"
                data-width="{{ pct_kcal }}" style="width:0%"></div>
         </div>
-        <div style="font-size:.78rem;color:var(--dim);margin-top:4px;">{{ pct_kcal }}% da meta diária</div>
+        <div style="font-size:.78rem;color:var(--green);margin-top:4px;">{{ pct_kcal }}% da meta diária</div>
       </div>
     </div>
 
-    <div class="card stat-card green">
+    <div class="card stat-card protein">
       <div class="card-title">💪 Proteína Hoje</div>
-      <div class="card-value" style="color:var(--green);">
+      <div class="card-value" style="color:var(--prot);">
         {{ total_prot }} <span class="card-unit">g</span>
       </div>
       <div class="progress-wrap">
@@ -43,10 +43,10 @@
           <span>Consumido</span><span>Meta: {{ goal_prot }}g</span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill {% if pct_prot >= 100 %}over{% endif %}"
+          <div class="progress-fill protein {% if pct_prot >= 100 %}over{% endif %}"
                data-width="{{ pct_prot }}" style="width:0%"></div>
         </div>
-        <div style="font-size:.78rem;color:var(--dim);margin-top:4px;">{{ pct_prot }}% da meta diária</div>
+        <div style="font-size:.78rem;color:var(--green);margin-top:4px;">{{ pct_prot }}% da meta diária</div>
       </div>
     </div>
 
@@ -67,15 +67,15 @@
   </div>
 
   <!-- ─── CARD EVOLUÇÃO CORPORAL & AVATAR ─── -->
-  <div class="card" style="margin-bottom:24px; background:var(--card2); border:1px solid rgba(255,255,255,0.08); overflow:hidden; position:relative;">
+  <div class="card" style="margin-bottom:24px; background:var(--card); overflow:hidden; position:relative;">
     <div style="display:grid; grid-template-columns: minmax(180px, 240px) 1fr; gap:24px; align-items:center;">
       
       <!-- BONECO INTERATIVO SVG (MASCULINO E FEMININO) -->
-      <div style="background:rgba(0,0,0,0.3); border-radius:16px; padding:20px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--border); position:relative; box-shadow:inset 0 0 20px rgba(0,0,0,0.3);">
+      <div style="background:var(--card2); border-radius:16px; padding:20px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--border); position:relative;">
         
         <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px; font-size:0.75rem; color:var(--dim); font-weight:700;">
           <span style="text-transform:uppercase; letter-spacing:0.05em;">Silhueta</span>
-          <span style="background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:12px; color:var(--text);">
+          <span style="background:var(--card); padding:2px 8px; border-radius:12px; color:var(--text);">
             {% if is_male %}♂️ Masculino{% else %}♀️ Feminino{% endif %}
           </span>
         </div>
@@ -364,7 +364,7 @@
         {% if current_user.weight_kg and current_user.height_cm %}
         <!-- Grade de Indicadores -->
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:12px; margin-bottom:18px;">
-          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+          <div style="background:var(--card2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">Gordura Est.</div>
             <div style="font-size:1.4rem; font-weight:800; color:{{ body_color }}; line-height:1.2; margin-top:2px;">
               {{ bf_pct }}%
@@ -372,7 +372,7 @@
             <div style="font-size:0.68rem; color:var(--dim);">BF corporal</div>
           </div>
 
-          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+          <div style="background:var(--card2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">IMC</div>
             <div style="font-size:1.4rem; font-weight:800; color:var(--yellow); line-height:1.2; margin-top:2px;">
               {{ bmi }}
@@ -380,7 +380,7 @@
             <div style="font-size:0.68rem; color:var(--dim);">Índice massa</div>
           </div>
 
-          <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+          <div style="background:var(--card2); padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
             <div style="font-size:0.72rem; color:var(--dim); text-transform:uppercase;">Peso Atual</div>
             <div style="font-size:1.4rem; font-weight:800; color:var(--green); line-height:1.2; margin-top:2px;">
               {{ current_user.weight_kg }} <span style="font-size:0.8rem; font-weight:400;">kg</span>
@@ -408,7 +408,7 @@
         </div>
 
         {% else %}
-        <div style="padding:20px; background:rgba(0,0,0,0.2); border-radius:10px; border:1px dashed var(--border); text-align:center;">
+        <div style="padding:20px; background:var(--card2); border-radius:10px; border:1px dashed var(--border); text-align:center;">
           <p style="color:var(--dim); font-size:0.9rem; margin-bottom:12px;">
             Para ativar seu avatar corporal e o cálculo de gordura, preencha sua altura e peso na calculadora de TMB!
           </p>
@@ -422,7 +422,7 @@
   <!-- Saldo calórico -->
   {% if current_user.goal_kcal %}
   {% set saldo = (goal_kcal - total_kcal)|round(1) %}
-  <div class="card" style="margin-bottom:24px;background:{% if saldo >= 0 %}rgba(67,233,123,.06){% else %}rgba(255,71,87,.06){% endif %};border-color:{% if saldo >= 0 %}rgba(67,233,123,.3){% else %}rgba(255,71,87,.3){% endif %};">
+  <div class="card" style="margin-bottom:24px;background:{% if saldo >= 0 %}#ECFDF5{% else %}#FEF2F2{% endif %};border-color:{% if saldo >= 0 %}#A7F3D0{% else %}#FECACA{% endif %};">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-size:.8rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;">Saldo calórico de hoje</div>
