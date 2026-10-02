@@ -68,7 +68,7 @@
 
   <!-- ─── CARD EVOLUÇÃO CORPORAL & AVATAR ─── -->
   <div class="card" style="margin-bottom:24px; background:var(--card); overflow:hidden; position:relative;">
-    <div class="avatar-evolution-layout">
+    <div class="body-composition-layout">
       
       <!-- BONECO INTERATIVO SVG (MASCULINO E FEMININO) -->
       <div style="background:var(--card2); border-radius:16px; padding:20px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--border); position:relative;">
@@ -338,10 +338,10 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
           <div>
             <h2 style="font-size:1.2rem; font-weight:800; color:var(--text); margin:0;">
-              🧍 Minha Evolução Corporal
+              📊 Minha Evolução Corporal
             </h2>
             <p style="font-size:0.85rem; color:var(--dim); margin-top:2px;">
-              Veja seu avatar afinar a cintura e reduzir gordura conforme você atinge suas metas!
+              Acompanhe as mudanças na sua composição corporal conforme você avança nas metas.
             </p>
           </div>
           {% if current_user.weight_kg and current_user.height_cm %}
@@ -383,7 +383,7 @@
         <div style="background:rgba(255,255,255,0.02); padding:14px 16px; border-radius:10px; border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
           <div>
             <div style="font-size:0.85rem; font-weight:700; color:var(--text);">Subiu na balança hoje?</div>
-            <div style="font-size:0.75rem; color:var(--dim);">Atualize seu peso e veja o boneco mudar na hora:</div>
+            <div style="font-size:0.75rem; color:var(--dim);">Atualize seu peso para acompanhar sua evolução:</div>
           </div>
 
           <form method="POST" action="{{ url_for('main.update_weight') }}" style="display:flex; align-items:center; gap:8px; margin:0;">
@@ -400,7 +400,7 @@
         {% else %}
         <div style="padding:20px; background:var(--card2); border-radius:10px; border:1px dashed var(--border); text-align:center;">
           <p style="color:var(--dim); font-size:0.9rem; margin-bottom:12px;">
-            Para ativar seu avatar corporal e o cálculo de gordura, preencha sua altura e peso na calculadora de TMB!
+            Para ativar o acompanhamento da composição corporal, preencha sua altura e peso na calculadora de TMB!
           </p>
           <a href="{{ url_for('main.bmr') }}" class="btn btn-primary btn-sm">Calcular TMB & Perfil →</a>
         </div>

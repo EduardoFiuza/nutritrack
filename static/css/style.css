@@ -125,11 +125,12 @@ a:hover { color: #1D4ED8; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.avatar-evolution-layout {
+.body-composition-layout {
   display: grid;
-  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+}
+.body-composition-layout > :first-child {
+  display: none;
 }
 
 /* ─── Cards ─────────────────────────────────────────────────────────────────── */
@@ -369,7 +370,6 @@ tbody tr:last-child { border-bottom: none; }
   .hamburger { display: flex; }
 
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .avatar-evolution-layout { grid-template-columns: 1fr; gap: 16px; }
   .result-grid { grid-template-columns: 1fr 1fr; }
 
   .container { padding: 16px 12px; }
