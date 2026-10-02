@@ -130,7 +130,7 @@ a:hover { color: #1D4ED8; }
   grid-template-columns: minmax(0, 1fr);
 }
 .body-composition-layout > :first-child {
-  display: none;
+  display: none !important;
 }
 
 /* ─── Cards ─────────────────────────────────────────────────────────────────── */
