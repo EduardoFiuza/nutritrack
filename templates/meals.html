@@ -24,22 +24,22 @@
         
         <div style="display:flex; flex-direction:column; gap:8px;">
           {% for fav in favorites %}
-          <div style="padding:10px 12px; background:var(--card); border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div style="flex:1; min-width:0;">
+          <div class="meal-favorite-row" style="padding:10px 12px; background:var(--card); border-radius:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div class="meal-favorite-info" style="flex:1; min-width:0;">
               <div style="font-weight:700; font-size:0.88rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                 {{ fav.name }}
               </div>
               <div style="font-size:0.75rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ fav.items_text }}">
                 {{ fav.items_text }}
               </div>
-              <div style="font-size:0.75rem; margin-top:2px;">
+              <div class="meal-favorite-stats" style="font-size:0.75rem; margin-top:2px;">
                 <span style="color:var(--yellow); font-weight:600;">🔥 {{ fav.total_kcal }} kcal</span> | 
                 <span style="color:var(--prot); font-weight:600;">💪 {{ fav.total_prot }}g</span> | 
-                <span class="badge badge-purple" style="font-size:0.68rem; padding:1px 6px;">{{ fav.meal_type }}</span>
+                <span class="badge badge-purple" style="font-size:0.75rem; padding:1px 6px;">{{ fav.meal_type }}</span>
               </div>
             </div>
             
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div class="meal-favorite-actions" style="display:flex; align-items:center; gap:6px;">
               <form method="POST" action="{{ url_for('main.apply_favorite', fav_id=fav.id) }}" style="margin:0; display:flex; align-items:center; gap:4px;">
                 <input type="hidden" name="date" value="{{ selected_date }}" />
                 <select name="meal_type" class="form-control" style="width:auto; padding:3px 6px; font-size:0.75rem; height:auto; background:var(--card); border:1px solid var(--border); color:var(--text);" title="Escolha onde lançar">
