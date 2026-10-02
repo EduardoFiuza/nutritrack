@@ -102,6 +102,13 @@ a:hover { color: #1D4ED8; }
   gap: 5px;
   cursor: pointer;
   padding: 4px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+.hamburger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 .hamburger span {
   width: 24px; height: 2px;

@@ -2,12 +2,24 @@
 const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('nav-menu');
 if (hamburger && navMenu) {
+  const setMenuOpen = isOpen => {
+    navMenu.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+    hamburger.setAttribute('aria-label', isOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+  };
+
   hamburger.addEventListener('click', () => {
-    navMenu.classList.toggle('open');
+    setMenuOpen(!navMenu.classList.contains('open'));
   });
   document.addEventListener('click', e => {
     if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-      navMenu.classList.remove('open');
+      setMenuOpen(false);
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+      setMenuOpen(false);
+      hamburger.focus();
     }
   });
 }
